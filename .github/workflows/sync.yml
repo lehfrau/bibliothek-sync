@@ -2,7 +2,7 @@ name: Bibliothek Kalender Sync
 
 on:
   schedule:
-    - cron: "0 6 * * 1,4"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
