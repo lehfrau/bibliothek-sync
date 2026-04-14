@@ -33,7 +33,7 @@ GOOGLE_TOKEN_FILE        = "token.json"
 
 # ID des Ziel-Kalenders (oder "primary" für Hauptkalender)
 # Eigenen Kalender empfohlen, z.B. "Bibliothek Fristen"
-KALENDER_ID = "primary"
+KALENDER_ID = "sc2ufkcp6satu4qnrq4mehj01k@group.calendar.google.com"
 
 # Wie viele Tage vor Ablauf soll der Erinnerungsalarm erscheinen?
 ERINNERUNG_TAGE_VORHER = 3
