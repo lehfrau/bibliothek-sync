@@ -25,11 +25,11 @@ from googleapiclient.discovery import build
 # KONFIGURATION – hier anpassen
 # ─────────────────────────────────────────────
 
-BIBLIOTHEK_AUSWEISNUMMER = "laura@lehfrau.de"   # z.B. "90100371"
-BIBLIOTHEK_PASSWORT      = "!2YYTrLihtXd4Lv"
+BIBLIOTHEK_AUSWEISNUMMER = os.environ.get("BIBL_AUSWEIS", "")
+BIBLIOTHEK_PASSWORT      = os.environ.get("BIBL_PASSWORT", "")
 
-GOOGLE_CREDENTIALS_FILE  = "credentials.json"       # OAuth-Client-Secret von Google
-GOOGLE_TOKEN_FILE        = "token.json"              # wird automatisch erzeugt
+GOOGLE_CREDENTIALS_FILE  = "credentials.json"
+GOOGLE_TOKEN_FILE        = "token.json"
 
 # ID des Ziel-Kalenders (oder "primary" für Hauptkalender)
 # Eigenen Kalender empfohlen, z.B. "Bibliothek Fristen"
