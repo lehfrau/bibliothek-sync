@@ -2,15 +2,15 @@
 """
 Stadtbibliothek Halle → Google Calendar Sync
 =============================================
-Liest ausgeliehene Medien aus dem Bibliotheksportal (katalog.halle.de)
+Liest ausgeliehene Medien aller Benutzer aus dem Bibliotheksportal (katalog.halle.de)
 und erstellt/aktualisiert Kalendereinträge in Google Calendar.
+Medien mit gleichem Rückgabedatum werden in einem gemeinsamen Eintrag zusammengefasst.
 
 Setup-Anleitung: siehe README-Abschnitt am Ende dieser Datei.
 """
 
 import os
 import re
-import json
 import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -25,41 +25,44 @@ from googleapiclient.discovery import build
 # KONFIGURATION – hier anpassen
 # ─────────────────────────────────────────────
 
-BIBLIOTHEK_AUSWEISNUMMER = os.environ.get("BIBL_AUSWEIS", "")
-BIBLIOTHEK_PASSWORT      = os.environ.get("BIBL_PASSWORT", "")
+BENUTZER = [
+    {
+        "name":    "Laura",
+        "ausweis": os.environ.get("BIBL_AUSWEIS_LAURA", ""),
+        "passwort": os.environ.get("BIBL_PASSWORT_LAURA", ""),
+    },
+    {
+        "name":    "Benny",
+        "ausweis": os.environ.get("BIBL_AUSWEIS_BENNY", ""),
+        "passwort": os.environ.get("BIBL_PASSWORT_BENNY", ""),
+    },
+]
 
-GOOGLE_CREDENTIALS_FILE  = "credentials.json"
-GOOGLE_TOKEN_FILE        = "token.json"
+GOOGLE_CREDENTIALS_FILE = "credentials.json"
+GOOGLE_TOKEN_FILE       = "token.json"
 
 # ID des Ziel-Kalenders (oder "primary" für Hauptkalender)
-# Eigenen Kalender empfohlen, z.B. "Bibliothek Fristen"
-KALENDER_ID = "sc2ufkcp6satu4qnrq4mehj01k@group.calendar.google.com"
+KALENDER_ID = "21b41bda46bed0a74602bc0234ff02aea277e70fec21548420e4526982a02f07@group.calendar.google.com"
 
 # Wie viele Tage vor Ablauf soll der Erinnerungsalarm erscheinen?
 ERINNERUNG_TAGE_VORHER = 3
-
-# Kennzeichnung für Kalendereinträge (damit das Script nur eigene Einträge anfasst)
-EVENT_KENNZEICHEN = "📚 Bibliothek Halle"
 
 # ─────────────────────────────────────────────
 # KONSTANTEN
 # ─────────────────────────────────────────────
 
-LOGIN_URL   = "https://katalog.halle.de/Mein-Konto"
-KONTO_URL   = "https://katalog.halle.de/Mein-Konto"
-SCOPES      = ["https://www.googleapis.com/auth/calendar"]
+LOGIN_URL = "https://katalog.halle.de/Mein-Konto"
+SCOPES    = ["https://www.googleapis.com/auth/calendar"]
 
 
 # ─────────────────────────────────────────────
 # SCHRITT 1: Bibliothekskonto scrapen
 # ─────────────────────────────────────────────
 
-def hole_ausgeliehene_medien():
+def hole_ausgeliehene_medien(name, ausweis, passwort):
     """
-    Loggt sich ins Bibliotheksportal ein und liest alle ausgeliehenen Medien
-    mit Titel und Rückgabedatum aus.
-
-    Rückgabe: Liste von Dicts mit keys: titel, frist (datetime.date), medium_id
+    Loggt sich ins Bibliotheksportal ein und liest alle ausgeliehenen Medien.
+    Rückgabe: Liste von Dicts mit keys: titel, frist (datetime.date), medium_id, name
     """
     session = requests.Session()
     session.headers.update({
@@ -70,99 +73,74 @@ def hole_ausgeliehene_medien():
         )
     })
 
-    # Seite laden um VIEWSTATE etc. zu holen
-    print("📡 Verbinde mit Bibliotheksportal...")
+    print(f"📡 Verbinde mit Bibliotheksportal ({name})...")
     response = session.get(LOGIN_URL)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # ASP.NET-Formularfelder auslesen
-    def get_hidden(name):
-        tag = soup.find("input", {"name": name})
+    def get_hidden(field_name):
+        tag = soup.find("input", {"name": field_name})
         return tag["value"] if tag else ""
-
-    viewstate          = get_hidden("__VIEWSTATE")
-    viewstate_gen      = get_hidden("__VIEWSTATEGENERATOR")
-    event_validation   = get_hidden("__EVENTVALIDATION")
-    viewstate_enc      = get_hidden("__VIEWSTATEENCRYPTED")
-
-    # Login-Formular absenden
-    # Feldnamen aus Debug-Ausgabe ermittelt (katalog.halle.de)
-    login_field_user = "dnn$ctr375$Login$Login_COP$txtUsername"
-    login_field_pass = "dnn$ctr375$Login$Login_COP$txtPassword"
 
     post_data = {
         "__EVENTTARGET":        "",
         "__EVENTARGUMENT":      "",
-        "__VIEWSTATE":          viewstate,
-        "__VIEWSTATEGENERATOR": viewstate_gen,
-        "__EVENTVALIDATION":    event_validation,
-        "__VIEWSTATEENCRYPTED": viewstate_enc,
-        login_field_user:       BIBLIOTHEK_AUSWEISNUMMER,
-        login_field_pass:       BIBLIOTHEK_PASSWORT,
-        "dnn$ctr375$Login$Login_COP$cmdLogin": "Anmelden",
+        "__VIEWSTATE":          get_hidden("__VIEWSTATE"),
+        "__VIEWSTATEGENERATOR": get_hidden("__VIEWSTATEGENERATOR"),
+        "__EVENTVALIDATION":    get_hidden("__EVENTVALIDATION"),
+        "__VIEWSTATEENCRYPTED": get_hidden("__VIEWSTATEENCRYPTED"),
+        "dnn$ctr375$Login$Login_COP$txtUsername": ausweis,
+        "dnn$ctr375$Login$Login_COP$txtPassword": passwort,
+        "dnn$ctr375$Login$Login_COP$cmdLogin":    "Anmelden",
     }
 
-    print("🔐 Melde an...")
+    print(f"🔐 Melde an ({name})...")
     response = session.post(LOGIN_URL, data=post_data)
     response.raise_for_status()
 
-    # Prüfen ob Login erfolgreich (Name erscheint im Header)
     if "abmelden" not in response.text.lower():
         raise RuntimeError(
-            "❌ Login fehlgeschlagen. Bitte Ausweisnummer und Passwort prüfen.\n"
-            "   Hinweis: Das Portal könnte eine andere Login-Struktur haben –\n"
-            "   dann run_debug_login() aufrufen für Diagnose."
+            f"❌ Login fehlgeschlagen für {name}. Bitte Ausweisnummer und Passwort prüfen.\n"
+            "   Hinweis: run_debug_login() aufrufen für Diagnose."
         )
-    print("✅ Login erfolgreich.")
+    print(f"✅ Login erfolgreich ({name}).")
 
-    return parse_ausleih_seite(response.text)
+    return parse_ausleih_seite(response.text, name)
 
 
-def parse_ausleih_seite(html):
-    """
-    Parst die HTML-Seite und extrahiert ausgeliehene Medien.
-    Erwartet Tabelle mit ID 'grdViewLoans'.
-    """
+def parse_ausleih_seite(html, name):
+    """Parst die HTML-Seite und extrahiert ausgeliehene Medien."""
     soup = BeautifulSoup(html, "html.parser")
     medien = []
 
-    # Ausleih-Tabelle finden
     tabelle = soup.find("table", {"id": lambda x: x and "grdViewLoans" in x})
 
     if not tabelle:
-        print("ℹ️  Keine ausgeliehenen Medien gefunden (Tabelle leer oder nicht vorhanden).")
+        print(f"ℹ️  Keine ausgeliehenen Medien für {name}.")
         return medien
 
-    zeilen = tabelle.find_all("tr")
-
-    for zeile in zeilen[1:]:  # erste Zeile = Header überspringen
+    for zeile in tabelle.find_all("tr")[1:]:  # erste Zeile = Header überspringen
         zellen = zeile.find_all("td")
         if len(zellen) < 4:
             continue
 
-        # Titel aus Link extrahieren
         titel_link = zeile.find("a", href=lambda h: h and "Mediensuche" in h)
         if not titel_link:
             continue
         titel = titel_link.get_text(strip=True)
 
-        # Medium-ID aus href
         href = titel_link.get("href", "")
         id_match = re.search(r"id=(\d+)", href)
         medium_id = id_match.group(1) if id_match else titel
 
-        # Datum suchen: Format TT.MM.JJJJ
-        # Die Frist steht in der Zelle, die ein Datum im deutschen Format enthält
+        # Nehme das späteste Datum (= Rückgabefrist, nicht Ausleihdatum)
         datum = None
         for zelle in zellen:
-            text = zelle.get_text(strip=True)
-            datum_match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", text)
+            datum_match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", zelle.get_text(strip=True))
             if datum_match:
                 tag, monat, jahr = datum_match.groups()
                 kandidat = datetime.date(int(jahr), int(monat), int(tag))
-                # Nehme das späteste Datum (= Rückgabefrist, nicht Ausleihdatum)
                 if datum is None or kandidat > datum:
                     datum = kandidat
 
@@ -171,6 +149,7 @@ def parse_ausleih_seite(html):
                 "titel":     titel,
                 "frist":     datum,
                 "medium_id": medium_id,
+                "name":      name,
             })
             print(f"   📖 {titel} → Frist: {datum.strftime('%d.%m.%Y')}")
 
@@ -204,116 +183,110 @@ def google_calendar_service():
 
 def hole_bestehende_biblio_events(service):
     """
-    Holt alle bestehenden Bibliotheks-Kalendereinträge (erkennbar am Kennzeichen).
-    Rückgabe: Dict {medium_id: event_dict}
+    Holt alle bestehenden Bibliotheks-Kalendereinträge.
+    Rückgabe: (events_by_datum, alte_events)
+      - events_by_datum: Dict {datum_str: event_dict}  (neues Format)
+      - alte_events: Liste von Events im alten Format (pro Medium) → werden gelöscht
     """
-    events_by_id = {}
+    events_by_datum = {}
+    alte_events = []
     page_token = None
 
     while True:
         result = service.events().list(
             calendarId=KALENDER_ID,
-            q=EVENT_KENNZEICHEN,
+            privateExtendedProperty="bibliothek_sync=true",
             singleEvents=True,
             maxResults=250,
             pageToken=page_token,
         ).execute()
 
         for event in result.get("items", []):
-            # Medium-ID aus extended properties lesen
             props = event.get("extendedProperties", {}).get("private", {})
-            mid = props.get("medium_id")
-            if mid:
-                events_by_id[mid] = event
+            datum = props.get("bibliothek_datum")
+            if datum:
+                events_by_datum[datum] = event
+            else:
+                # Altes Format (ein Event pro Medium) → zum Migrieren vormerken
+                alte_events.append(event)
 
         page_token = result.get("nextPageToken")
         if not page_token:
             break
 
-    return events_by_id
+    return events_by_datum, alte_events
 
 
-def erstelle_oder_aktualisiere_event(service, medium, bestehende_events):
-    """
-    Erstellt einen neuen Kalendereintrag oder verschiebt einen bestehenden,
-    wenn sich das Datum geändert hat (= Verlängerung).
-    """
-    medium_id   = str(medium["medium_id"])
-    titel       = medium["titel"]
-    frist       = medium["frist"]
-    summary     = f"📚 {titel}"
+def baue_event_body(datum_str, medien_gruppe):
+    """Erstellt den Event-Body für eine Gruppe von Medien am gleichen Tag."""
+    anzahl = len(medien_gruppe)
+    summary = "📚 1 Medium abgeben" if anzahl == 1 else f"📚 {anzahl} Medien abgeben"
 
-    # Datum als ISO-String
-    datum_str = frist.isoformat()
+    beschreibung = "\n".join(
+        f"- {m['titel']} ({m['name']})"
+        for m in sorted(medien_gruppe, key=lambda m: (m["name"], m["titel"]))
+    )
 
-    # Erinnerung: X Tage vor Ablauf in Minuten umrechnen
     erinnerung_minuten = ERINNERUNG_TAGE_VORHER * 24 * 60
+    medium_ids_str = ",".join(sorted(m["medium_id"] for m in medien_gruppe))
 
-    neues_event = {
-        "summary": summary,
-        "description": (
-            f"Rückgabefrist: {frist.strftime('%d.%m.%Y')}\n"
-            f"Bibliothek Halle – Katalog: https://katalog.halle.de/Mediensuche?id={medium_id}"
-        ),
-        "start": {"date": datum_str},
-        "end":   {"date": datum_str},
+    return {
+        "summary":     summary,
+        "description": beschreibung,
+        "start":       {"date": datum_str},
+        "end":         {"date": datum_str},
         "reminders": {
             "useDefault": False,
             "overrides": [
-                {"method": "popup",  "minutes": erinnerung_minuten},
-                {"method": "email",  "minutes": erinnerung_minuten},
+                {"method": "popup", "minutes": erinnerung_minuten},
+                {"method": "email", "minutes": erinnerung_minuten},
             ],
         },
         "extendedProperties": {
             "private": {
-                "medium_id":        medium_id,
+                "bibliothek_datum": datum_str,
                 "bibliothek_sync":  "true",
+                "medium_ids":       medium_ids_str,
             }
         },
-        "colorId": "9",  # Blaubeere – gut erkennbar
+        "colorId": "9",  # Blaubeere
     }
 
-    if medium_id in bestehende_events:
-        altes_event = bestehende_events[medium_id]
-        altes_datum = altes_event.get("start", {}).get("date", "")
 
-        if altes_datum == datum_str:
-            print(f"   ⏭️  Unverändert: {titel} ({frist.strftime('%d.%m.%Y')})")
-            return
+def sync_events(service, medien_nach_datum, bestehende_events):
+    """Erstellt/aktualisiert Events und löscht veraltete."""
+    for datum_str, medien_gruppe in sorted(medien_nach_datum.items()):
+        neues_body = baue_event_body(datum_str, medien_gruppe)
+        neue_ids = neues_body["extendedProperties"]["private"]["medium_ids"]
 
-        # Datum hat sich geändert → Event aktualisieren (Verlängerung!)
-        event_id = altes_event["id"]
-        service.events().update(
-            calendarId=KALENDER_ID,
-            eventId=event_id,
-            body=neues_event,
-        ).execute()
-        print(
-            f"   🔄 Verlängert: {titel}\n"
-            f"      {altes_datum} → {datum_str}"
-        )
-    else:
-        # Neues Event anlegen
-        service.events().insert(
-            calendarId=KALENDER_ID,
-            body=neues_event,
-        ).execute()
-        print(f"   ✅ Neu: {titel} → {frist.strftime('%d.%m.%Y')}")
+        if datum_str in bestehende_events:
+            altes_event = bestehende_events[datum_str]
+            alte_ids = altes_event.get("extendedProperties", {}).get("private", {}).get("medium_ids", "")
 
+            if alte_ids == neue_ids:
+                print(f"   ⏭️  Unverändert: {datum_str} ({len(medien_gruppe)} Medium/Medien)")
+            else:
+                service.events().update(
+                    calendarId=KALENDER_ID,
+                    eventId=altes_event["id"],
+                    body=neues_body,
+                ).execute()
+                print(f"   🔄 Aktualisiert: {datum_str} ({len(medien_gruppe)} Medium/Medien)")
+        else:
+            service.events().insert(
+                calendarId=KALENDER_ID,
+                body=neues_body,
+            ).execute()
+            titel_liste = ", ".join(f"{m['titel']} ({m['name']})" for m in medien_gruppe)
+            print(f"   ✅ Neu: {datum_str} → {titel_liste}")
 
-def loesche_veraltete_events(service, aktuelle_medium_ids, bestehende_events):
-    """
-    Löscht Kalendereinträge für Medien, die nicht mehr ausgeliehen sind
-    (d.h. zurückgegeben wurden).
-    """
-    for medium_id, event in bestehende_events.items():
-        if medium_id not in aktuelle_medium_ids:
-            titel = event.get("summary", medium_id)
+    for datum_str, event in bestehende_events.items():
+        if datum_str not in medien_nach_datum:
             service.events().delete(
                 calendarId=KALENDER_ID,
                 eventId=event["id"],
             ).execute()
-            print(f"   🗑️  Zurückgegeben (Event gelöscht): {titel}")
+            print(f"   🗑️  Gelöscht (alle Medien zurückgegeben): {datum_str}")
 
 
 # ─────────────────────────────────────────────
@@ -325,18 +298,27 @@ def main():
     print("  📚 Bibliothek Halle → Google Calendar Sync")
     print("═" * 55 + "\n")
 
-    # 1. Medien aus Bibliotheksportal holen
-    print("─── Ausgeliehene Medien ───")
-    try:
-        medien = hole_ausgeliehene_medien()
-    except Exception as e:
-        print(f"\n❌ Fehler beim Abruf des Bibliothekskontos:\n   {e}")
-        return
+    # 1. Medien aller Benutzer abrufen
+    alle_medien = []
+    for benutzer in BENUTZER:
+        print(f"─── Ausgeliehene Medien: {benutzer['name']} ───")
+        try:
+            medien = hole_ausgeliehene_medien(
+                benutzer["name"], benutzer["ausweis"], benutzer["passwort"]
+            )
+            alle_medien.extend(medien)
+        except Exception as e:
+            print(f"\n❌ Fehler beim Abruf für {benutzer['name']}:\n   {e}")
 
-    if not medien:
+    if not alle_medien:
         print("ℹ️  Aktuell keine Medien ausgeliehen.")
 
-    # 2. Google Calendar verbinden
+    # 2. Medien nach Rückgabedatum gruppieren
+    medien_nach_datum = {}
+    for medium in alle_medien:
+        medien_nach_datum.setdefault(medium["frist"].isoformat(), []).append(medium)
+
+    # 3. Google Calendar verbinden
     print("\n─── Google Calendar ───")
     try:
         service = google_calendar_service()
@@ -344,20 +326,20 @@ def main():
         print(f"\n❌ Fehler bei Google-Authentifizierung:\n   {e}")
         return
 
-    # 3. Bestehende Bibliotheks-Events laden
-    bestehende_events = hole_bestehende_biblio_events(service)
-    print(f"   Gefunden: {len(bestehende_events)} bestehende Einträge im Kalender.\n")
+    # 4. Bestehende Events laden
+    bestehende_events, alte_events = hole_bestehende_biblio_events(service)
+    print(f"   Gefunden: {len(bestehende_events)} bestehende Einträge im Kalender.")
+    if alte_events:
+        print(f"   Migration: {len(alte_events)} Einträge im alten Format werden gelöscht.")
 
-    # 4. Events erstellen/aktualisieren
-    print("─── Kalender aktualisieren ───")
-    aktuelle_ids = set()
-    for medium in medien:
-        mid = str(medium["medium_id"])
-        aktuelle_ids.add(mid)
-        erstelle_oder_aktualisiere_event(service, medium, bestehende_events)
+    # 4a. Alte Events (ein Event pro Medium) löschen
+    for event in alte_events:
+        service.events().delete(calendarId=KALENDER_ID, eventId=event["id"]).execute()
+        print(f"   🗑️  Migration: altes Event gelöscht: {event.get('summary', event['id'])}")
 
-    # 5. Zurückgegebene Medien aus Kalender entfernen
-    loesche_veraltete_events(service, aktuelle_ids, bestehende_events)
+    # 5. Events synchronisieren
+    print("\n─── Kalender aktualisieren ───")
+    sync_events(service, medien_nach_datum, bestehende_events)
 
     print("\n" + "═" * 55)
     print("  ✅ Sync abgeschlossen!")
@@ -381,10 +363,9 @@ def run_debug_login():
 
     print("\n=== Formularfelder der Kontoseite ===")
     for inp in soup.find_all("input"):
-        name = inp.get("name", "")
-        typ  = inp.get("type", "text")
-        if typ not in ("hidden",):
-            print(f"  [{typ}] name='{name}'")
+        typ = inp.get("type", "text")
+        if typ != "hidden":
+            print(f"  [{typ}] name='{inp.get('name', '')}'")
 
     print("\n=== Versteckte Felder ===")
     for inp in soup.find_all("input", {"type": "hidden"}):
@@ -416,12 +397,14 @@ if __name__ == "__main__":
 #
 # SCHRITT 1: Bibliotheksdaten eintragen
 # ─────────────────────────────────────
-# Oben im Script BIBLIOTHEK_AUSWEISNUMMER und BIBLIOTHEK_PASSWORT setzen.
-# Alternativ: Umgebungsvariablen BIBL_AUSWEIS und BIBL_PASSWORT setzen
-# und die Zeilen oben durch diese ersetzen:
+# Umgebungsvariablen setzen (z.B. als GitHub Secrets):
 #
-#   BIBLIOTHEK_AUSWEISNUMMER = os.environ["BIBL_AUSWEIS"]
-#   BIBLIOTHEK_PASSWORT      = os.environ["BIBL_PASSWORT"]
+#   BIBL_AUSWEIS_LAURA   – Ausweisnummer Laura
+#   BIBL_PASSWORT_LAURA  – Passwort Laura
+#   BIBL_AUSWEIS_BENNY   – Ausweisnummer Benny
+#   BIBL_PASSWORT_BENNY  – Passwort Benny
+#
+# Weitere Benutzer können in der BENUTZER-Liste oben hinzugefügt werden.
 #
 #
 # SCHRITT 2: Google Calendar API einrichten
@@ -440,7 +423,6 @@ if __name__ == "__main__":
 # ────────────────────────────────────────────────
 # In Google Calendar: + Neuer Kalender → z.B. "Bibliothek Fristen"
 # Kalender-ID findest du unter: Einstellungen → Kalender → Kalender-ID
-# (sieht aus wie: abc123@group.calendar.google.com)
 # Diese ID oben als KALENDER_ID eintragen.
 #
 #

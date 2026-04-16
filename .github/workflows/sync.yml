@@ -33,6 +33,8 @@ jobs:
 
       - name: Sync ausführen
         env:
-          BIBL_AUSWEIS:  ${{ secrets.BIBL_AUSWEIS }}
-          BIBL_PASSWORT: ${{ secrets.BIBL_PASSWORT }}
+          BIBL_AUSWEIS_LAURA:  ${{ secrets.BIBL_AUSWEIS_LAURA }}
+          BIBL_PASSWORT_LAURA: ${{ secrets.BIBL_PASSWORT_LAURA }}
+          BIBL_AUSWEIS_BENNY:  ${{ secrets.BIBL_AUSWEIS_BENNY }}
+          BIBL_PASSWORT_BENNY: ${{ secrets.BIBL_PASSWORT_BENNY }}
         run: python bibliothek_kalender_sync.py
