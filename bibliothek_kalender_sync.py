@@ -545,10 +545,15 @@ def generiere_html(root):
 
     nutzer_farben = {"Laura": "#dbeafe", "Benny": "#dcfce7"}
 
+    def display_gruppe(e):
+        if e["mediengruppe"] == "Hörspielzeug":
+            return "Edurinos" if e["titel"].startswith("Edurino") else "Tonies"
+        return e["mediengruppe"] or "Sonstiges"
+
     # Nach Mediengruppe gruppieren
     gruppen = {}
     for e in eintraege:
-        gruppen.setdefault(e["mediengruppe"] or "Sonstiges", []).append(e)
+        gruppen.setdefault(display_gruppe(e), []).append(e)
 
     def karte_html(e):
         ist_aktiv = not e["bis"]
@@ -585,8 +590,16 @@ def generiere_html(root):
             f'</div>'
         )
 
+    gruppen_reihenfolge = ["Kinder-Buch", "Tonies", "Edurinos", "Kinder-CD", "Spiel"]
+
+    def gruppe_sort_key(g):
+        try:
+            return gruppen_reihenfolge.index(g[0])
+        except ValueError:
+            return len(gruppen_reihenfolge)
+
     sektionen = []
-    for gruppe, items in sorted(gruppen.items(), key=lambda g: g[0].lower()):
+    for gruppe, items in sorted(gruppen.items(), key=gruppe_sort_key):
         anz = len(items)
         anz_aktiv_gruppe = sum(1 for e in items if not e["bis"])
         aktiv_hint = f" · {anz_aktiv_gruppe} ausgeliehen" if anz_aktiv_gruppe else ""
