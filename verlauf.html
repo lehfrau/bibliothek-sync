@@ -166,7 +166,7 @@
 </div>
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
-    <div class="subtitle">14 Medien insgesamt · 14 aktuell ausgeliehen · Stand 17.04.2026 18:16</div>
+    <div class="subtitle">14 Medien insgesamt · 14 aktuell ausgeliehen · Stand 17.04.2026 20:16</div>
   </header>
   <details open>
   <summary>Hörspielzeug <span class="gruppe-anzahl">(4 · 4 ausgeliehen)</span></summary>
@@ -204,15 +204,15 @@
 </details>
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
   <script>
-  (async () => {
-    if (sessionStorage.getItem('bib_auth') === '1')
-      document.getElementById('pw-overlay').style.display = 'none';
-  })();
-  async function checkPw() {
+  if (sessionStorage.getItem('bib_auth') === '1')
+    document.getElementById('pw-overlay').style.display = 'none';
+  function checkPw() {
     const val = document.getElementById('pw-input').value;
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
-    const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    if (hex === '70a1ac1f10db1efc6bca922675823062b86fe7cff5b47f23ee0967173105d877') {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < val.length; i++)
+      h = Math.imul(h ^ val.charCodeAt(i), 0x01000193) >>> 0;
+    const hex = h.toString(16).padStart(8, '0');
+    if (hex === '519d7568') {
       sessionStorage.setItem('bib_auth', '1');
       document.getElementById('pw-overlay').style.display = 'none';
     } else {

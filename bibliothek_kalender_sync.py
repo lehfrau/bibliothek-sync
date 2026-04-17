@@ -15,7 +15,6 @@ Setup-Anleitung: siehe README-Abschnitt am Ende dieser Datei.
 import os
 import re
 import time
-import hashlib
 import datetime
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -605,7 +604,14 @@ def generiere_html(root):
     sektionen_html = "\n".join(sektionen)
 
     if SEITEN_PASSWORT:
-        pw_hash = hashlib.sha256(SEITEN_PASSWORT.encode()).hexdigest()
+        # FNV-1a 32-bit – läuft überall (kein crypto.subtle nötig)
+        def _fnv1a(s):
+            h = 0x811c9dc5
+            for c in s.encode("utf-8"):
+                h = ((h ^ c) * 0x01000193) & 0xFFFFFFFF
+            return format(h, "08x")
+
+        pw_hash = _fnv1a(SEITEN_PASSWORT)
         pw_overlay_html = f"""<div id="pw-overlay">
   <div id="pw-box">
     <h2>📚 Bibliothek</h2>
@@ -617,14 +623,14 @@ def generiere_html(root):
   </div>
 </div>"""
         pw_script_html = f"""<script>
-  (async () => {{
-    if (sessionStorage.getItem('bib_auth') === '1')
-      document.getElementById('pw-overlay').style.display = 'none';
-  }})();
-  async function checkPw() {{
+  if (sessionStorage.getItem('bib_auth') === '1')
+    document.getElementById('pw-overlay').style.display = 'none';
+  function checkPw() {{
     const val = document.getElementById('pw-input').value;
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
-    const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    let h = 0x811c9dc5;
+    for (let i = 0; i < val.length; i++)
+      h = Math.imul(h ^ val.charCodeAt(i), 0x01000193) >>> 0;
+    const hex = h.toString(16).padStart(8, '0');
     if (hex === '{pw_hash}') {{
       sessionStorage.setItem('bib_auth', '1');
       document.getElementById('pw-overlay').style.display = 'none';
