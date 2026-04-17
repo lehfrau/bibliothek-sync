@@ -46,5 +46,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add verlauf.xml verlauf.html
-          git diff --cached --quiet || git commit -m "📚 Verlauf aktualisiert $(date +'%Y-%m-%d')"
+          git diff --cached --quiet || git commit -m "Verlauf aktualisiert $(date +'%Y-%m-%d')"
           git push
