@@ -38,3 +38,11 @@ jobs:
           BIBL_AUSWEIS_BENNY:  ${{ secrets.BIBL_AUSWEIS_BENNY }}
           BIBL_PASSWORT_BENNY: ${{ secrets.BIBL_PASSWORT_BENNY }}
         run: python bibliothek_kalender_sync.py
+
+      - name: Verlauf committen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add verlauf.xml verlauf.html
+          git diff --cached --quiet || git commit -m "📚 Verlauf aktualisiert $(date +'%Y-%m-%d')"
+          git push

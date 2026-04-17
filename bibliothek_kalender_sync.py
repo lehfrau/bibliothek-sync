@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 """
-Stadtbibliothek Halle → Google Calendar Sync
-=============================================
-Liest ausgeliehene Medien aller Benutzer aus dem Bibliotheksportal (katalog.halle.de)
-und erstellt/aktualisiert Kalendereinträge in Google Calendar.
-Medien mit gleichem Rückgabedatum werden in einem gemeinsamen Eintrag zusammengefasst.
+Stadtbibliothek Halle → Google Calendar Sync + Ausleih-Verlauf
+===============================================================
+Liest ausgeliehene Medien aller Benutzer aus dem Bibliotheksportal (katalog.halle.de),
+erstellt/aktualisiert Kalendereinträge in Google Calendar und führt eine Verlaufs-
+Übersicht (verlauf.xml / verlauf.html) mit Covern und Ausleihdaten.
+
+Medien mit gleichem Rückgabedatum werden in einem gemeinsamen Kalendereintrag
+zusammengefasst.
 
 Setup-Anleitung: siehe README-Abschnitt am Ende dieser Datei.
 """
 
 import os
 import re
+import time
 import datetime
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
@@ -47,6 +54,10 @@ KALENDER_ID = "21b41bda46bed0a74602bc0234ff02aea277e70fec21548420e4526982a02f07@
 # Wie viele Tage vor Ablauf soll der Erinnerungsalarm erscheinen?
 ERINNERUNG_TAGE_VORHER = 3
 
+# Verlauf-Dateien
+VERLAUF_XML  = "verlauf.xml"
+VERLAUF_HTML = "verlauf.html"
+
 # ─────────────────────────────────────────────
 # KONSTANTEN
 # ─────────────────────────────────────────────
@@ -62,7 +73,8 @@ SCOPES    = ["https://www.googleapis.com/auth/calendar"]
 def hole_ausgeliehene_medien(name, ausweis, passwort):
     """
     Loggt sich ins Bibliotheksportal ein und liest alle ausgeliehenen Medien.
-    Rückgabe: Liste von Dicts mit keys: titel, frist (datetime.date), medium_id, name
+    Rückgabe: Liste von Dicts mit keys: titel, frist, medium_id, name,
+              verfasser, mediengruppe, isbn
     """
     session = requests.Session()
     session.headers.update({
@@ -144,12 +156,47 @@ def parse_ausleih_seite(html, name):
                 if datum is None or kandidat > datum:
                     datum = kandidat
 
+        # Verfasser
+        verfasser = ""
+        for zelle in zellen:
+            label = zelle.find("span", class_=lambda c: c and "oclc-module-label" in c)
+            if label and "Verfasser" in label.get_text():
+                value = label.find_next_sibling("span")
+                if value:
+                    verfasser = value.get_text(strip=True)
+                break
+
+        # Mediengruppe
+        mediengruppe = ""
+        for zelle in zellen:
+            label = zelle.find("span", class_=lambda c: c and "oclc-module-label" in c)
+            if label and "Mediengruppe" in label.get_text():
+                value = label.find_next_sibling("span")
+                if value:
+                    mediengruppe = value.get_text(strip=True)
+                break
+
+        # ISBN-13 aus data-devsources des Cover-Images (nur 978/979-Nummern sind Buch-ISBNs)
+        isbn = ""
+        cover_img = zeile.find("img", class_=lambda c: c and "coverSmall" in c)
+        if cover_img:
+            for attr in ("data-devsources", "data-sources"):
+                match = re.search(r"GetMvbCover\|a\|0\$(\d+)", cover_img.get(attr, ""))
+                if match:
+                    candidate = match.group(1)
+                    if candidate.startswith(("978", "979")):
+                        isbn = candidate
+                    break
+
         if titel and datum:
             medien.append({
-                "titel":     titel,
-                "frist":     datum,
-                "medium_id": medium_id,
-                "name":      name,
+                "titel":        titel,
+                "frist":        datum,
+                "medium_id":    medium_id,
+                "name":         name,
+                "verfasser":    verfasser,
+                "mediengruppe": mediengruppe,
+                "isbn":         isbn,
             })
             print(f"   📖 {titel} → Frist: {datum.strftime('%d.%m.%Y')}")
 
@@ -290,7 +337,375 @@ def sync_events(service, medien_nach_datum, bestehende_events):
 
 
 # ─────────────────────────────────────────────
-# SCHRITT 3: Hauptprogramm
+# SCHRITT 3: Verlauf-Tracking
+# ─────────────────────────────────────────────
+
+def _xml_text(element, tag):
+    child = element.find(tag)
+    return (child.text or "") if child is not None else ""
+
+
+def hole_cover_url(isbn):
+    """Sucht Cover bei Open Library (primär) oder Google Books (Fallback)."""
+    if not isbn:
+        return ""
+
+    # Primär: Open Library (höhere Auflösung)
+    ol_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
+    try:
+        resp = requests.head(ol_url, params={"default": "false"}, timeout=8, allow_redirects=True)
+        if resp.status_code == 200:
+            return ol_url
+    except Exception as exc:
+        print(f"      ⚠️  Open Library fehlgeschlagen für ISBN {isbn}: {exc}")
+
+    # Fallback: Google Books
+    try:
+        resp = requests.get(
+            "https://www.googleapis.com/books/v1/volumes",
+            params={"q": f"isbn:{isbn}", "maxResults": 1},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        items = resp.json().get("items", [])
+        if items:
+            links = items[0].get("volumeInfo", {}).get("imageLinks", {})
+            url = links.get("thumbnail") or links.get("smallThumbnail") or ""
+            if url:
+                return url.replace("http://", "https://")
+    except Exception as exc:
+        print(f"      ⚠️  Google Books fehlgeschlagen für ISBN {isbn}: {exc}")
+
+    print(f"      ⚠️  Kein Cover gefunden für ISBN {isbn}")
+    return ""
+
+
+def _strip_whitespace(elem):
+    """Entfernt reine Whitespace-Textknoten, die minidom beim erneuten Laden multipliziert."""
+    for e in elem.iter():
+        if e.text and not e.text.strip():
+            e.text = None
+        if e.tail and not e.tail.strip():
+            e.tail = None
+
+
+def lade_verlauf():
+    """Lädt verlauf.xml oder gibt leeres Root-Element zurück."""
+    if Path(VERLAUF_XML).exists():
+        root = ET.parse(VERLAUF_XML).getroot()
+        _strip_whitespace(root)
+        return root
+    return ET.Element("verlauf")
+
+
+def speichere_verlauf(root):
+    """Speichert verlauf.xml hübsch eingerückt."""
+    raw = ET.tostring(root, encoding="unicode")
+    dom = minidom.parseString(raw)
+    pretty = dom.toprettyxml(indent="  ", encoding="UTF-8")
+    with open(VERLAUF_XML, "wb") as f:
+        f.write(pretty)
+
+
+def aktualisiere_verlauf(alle_medien):
+    """Gleicht verlauf.xml mit aktuell ausgeliehenen Medien ab."""
+    root = lade_verlauf()
+    heute = datetime.date.today().isoformat()
+    aktuelle_ids = {m["medium_id"] for m in alle_medien}
+
+    # Rückgaben markieren
+    for elem in root.findall("medium"):
+        if not _xml_text(elem, "zurueckgegeben") and _xml_text(elem, "medium_id") not in aktuelle_ids:
+            elem.find("zurueckgegeben").text = heute
+            print(f"   📕 Verlauf: zurückgegeben – {_xml_text(elem, 'titel')}")
+
+    # Neue Medien eintragen / Frist aktualisieren
+    for medium in alle_medien:
+        mid = medium["medium_id"]
+        frist_str = medium["frist"].isoformat()
+
+        # Aktiven Eintrag suchen (noch nicht zurückgegeben)
+        aktiv = next(
+            (e for e in root.findall("medium")
+             if _xml_text(e, "medium_id") == mid and not _xml_text(e, "zurueckgegeben")),
+            None
+        )
+
+        if aktiv is not None:
+            aktiv.find("letzte_frist").text = frist_str
+        else:
+            isbn = medium.get("isbn", "")
+            is_buch = "Buch" in medium.get("mediengruppe", "")
+            if isbn and is_buch:
+                time.sleep(2)
+            cover_url = hole_cover_url(isbn) if (isbn and is_buch) else ""
+            if cover_url:
+                print(f"      🖼  Cover gefunden: {medium['titel']}")
+            elem = ET.SubElement(root, "medium")
+            ET.SubElement(elem, "medium_id").text       = mid
+            ET.SubElement(elem, "titel").text            = medium["titel"]
+            ET.SubElement(elem, "verfasser").text        = medium.get("verfasser", "")
+            ET.SubElement(elem, "mediengruppe").text     = medium.get("mediengruppe", "")
+            ET.SubElement(elem, "nutzer").text           = medium["name"]
+            ET.SubElement(elem, "isbn").text             = isbn
+            ET.SubElement(elem, "cover_url").text        = cover_url
+            ET.SubElement(elem, "ausgeliehen_seit").text = heute
+            ET.SubElement(elem, "zurueckgegeben").text   = ""
+            ET.SubElement(elem, "letzte_frist").text     = frist_str
+            print(f"   📗 Verlauf: neu – {medium['titel']}")
+
+    # Cover nachladen für Einträge mit ISBN aber ohne Cover-URL (nur Bücher)
+    for elem in root.findall("medium"):
+        isbn = _xml_text(elem, "isbn")
+        cover_node = elem.find("cover_url")
+        mediengruppe = _xml_text(elem, "mediengruppe")
+        if isbn and "Buch" in mediengruppe and cover_node is not None and not (cover_node.text or "").strip():
+            time.sleep(2)
+            url = hole_cover_url(isbn)
+            if url:
+                cover_node.text = url
+                print(f"      🖼  Cover nachgeladen: {_xml_text(elem, 'titel')}")
+
+    speichere_verlauf(root)
+    return root
+
+
+def generiere_html(root):
+    """Generiert verlauf.html aus dem Verlauf-XML-Root."""
+    heute = datetime.date.today()
+
+    eintraege = []
+    for elem in root.findall("medium"):
+        eintraege.append({
+            "medium_id":    _xml_text(elem, "medium_id"),
+            "titel":        _xml_text(elem, "titel"),
+            "verfasser":    _xml_text(elem, "verfasser"),
+            "mediengruppe": _xml_text(elem, "mediengruppe"),
+            "nutzer":       _xml_text(elem, "nutzer"),
+            "isbn":         _xml_text(elem, "isbn"),
+            "cover_url":    _xml_text(elem, "cover_url"),
+            "seit":         _xml_text(elem, "ausgeliehen_seit"),
+            "bis":          _xml_text(elem, "zurueckgegeben"),
+            "frist":        _xml_text(elem, "letzte_frist"),
+        })
+
+    eintraege.sort(key=lambda x: (x["mediengruppe"].lower(), x["titel"].lower()))
+
+    def fmt_datum(iso):
+        try:
+            return datetime.date.fromisoformat(iso).strftime("%d.%m.%Y")
+        except (ValueError, TypeError):
+            return iso
+
+    def tage(seit, bis):
+        try:
+            d1 = datetime.date.fromisoformat(seit)
+            d2 = datetime.date.fromisoformat(bis) if bis else heute
+            return (d2 - d1).days
+        except (ValueError, TypeError):
+            return 0
+
+    nutzer_farben = {"Laura": "#dbeafe", "Benny": "#dcfce7"}
+
+    # Nach Mediengruppe gruppieren
+    gruppen = {}
+    for e in eintraege:
+        gruppen.setdefault(e["mediengruppe"] or "Sonstiges", []).append(e)
+
+    def karte_html(e):
+        ist_aktiv = not e["bis"]
+        farbe = nutzer_farben.get(e["nutzer"], "#f3f4f6")
+        t = tage(e["seit"], e["bis"])
+
+        if e["cover_url"]:
+            cover_img = (
+                f'<img src="{e["cover_url"]}" alt="" loading="lazy" '
+                f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+                f'<div class="no-cover" style="display:none">📚</div>'
+            )
+        else:
+            cover_img = '<div class="no-cover">📚</div>'
+
+        dot = '<span class="dot-aktiv"></span>' if ist_aktiv else ''
+        verfasser_html = f'<div class="verfasser">{e["verfasser"]}</div>' if e["verfasser"] else ""
+        datum_zeile = fmt_datum(e["seit"])
+        if e["bis"]:
+            datum_zeile += f' – {fmt_datum(e["bis"])}'
+
+        return (
+            f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}">'
+            f'<a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id={e["medium_id"]}" target="_blank">'
+            f'{cover_img}'
+            f'{dot}'
+            f'<span class="nutzer-badge" style="background:{farbe}">{e["nutzer"]}</span>'
+            f'</a>'
+            f'<div class="info">'
+            f'<div class="titel">{e["titel"]}</div>'
+            f'{verfasser_html}'
+            f'<div class="datum">📅 {datum_zeile} · {t} {"Tag" if t == 1 else "Tage"}</div>'
+            f'</div>'
+            f'</div>'
+        )
+
+    sektionen = []
+    for gruppe, items in sorted(gruppen.items(), key=lambda g: g[0].lower()):
+        anz = len(items)
+        anz_aktiv_gruppe = sum(1 for e in items if not e["bis"])
+        aktiv_hint = f" · {anz_aktiv_gruppe} ausgeliehen" if anz_aktiv_gruppe else ""
+        karten_block = "\n".join(karte_html(e) for e in items)
+        sektionen.append(
+            f'<details open>\n'
+            f'  <summary>{gruppe} <span class="gruppe-anzahl">({anz}{aktiv_hint})</span></summary>\n'
+            f'  <div class="raster">\n{karten_block}\n  </div>\n'
+            f'</details>'
+        )
+
+    anz_gesamt = len(eintraege)
+    anz_aktiv  = sum(1 for e in eintraege if not e["bis"])
+    generiert  = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    sektionen_html = "\n".join(sektionen)
+
+    html = f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bibliothek Verlauf</title>
+  <style>
+    *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1f2937;
+      padding: 24px 20px;
+      min-height: 100vh;
+    }}
+    header {{ margin-bottom: 24px; }}
+    h1 {{ font-size: 1.75rem; color: #111827; margin-bottom: 4px; }}
+    .subtitle {{ font-size: 0.875rem; color: #6b7280; }}
+    details {{ margin-bottom: 20px; }}
+    details[open] summary {{ border-radius: 10px 10px 0 0; }}
+    summary {{
+      list-style: none;
+      cursor: pointer;
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }}
+    summary::before {{
+      content: "▶";
+      font-size: 0.65rem;
+      color: #9ca3af;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }}
+    details[open] summary::before {{ transform: rotate(90deg); }}
+    summary::-webkit-details-marker {{ display: none; }}
+    .gruppe-anzahl {{ font-size: 0.8rem; font-weight: 400; color: #6b7280; }}
+    .raster {{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      background: #fff;
+      border-radius: 0 0 10px 10px;
+      padding: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }}
+    .karte {{
+      background: #f9fafb;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }}
+    .karte-zurueck {{ opacity: 0.6; box-shadow: none; }}
+    .cover-wrap {{
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background: #e5e7eb;
+      display: block;
+      overflow: hidden;
+      text-decoration: none;
+    }}
+    .cover-wrap img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }}
+    .no-cover {{
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      background: #e5e7eb;
+    }}
+    .dot-aktiv {{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 13px;
+      height: 13px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
+    }}
+    .nutzer-badge {{
+      position: absolute;
+      bottom: 7px;
+      right: 7px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.08);
+    }}
+    .info {{
+      padding: 9px 10px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }}
+    .titel {{
+      font-weight: 700;
+      font-size: 0.82rem;
+      line-height: 1.3;
+      color: #111827;
+    }}
+    .verfasser {{ font-size: 0.74rem; color: #6b7280; }}
+    .datum {{ font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }}
+    footer {{ margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📚 Bibliothek Verlauf</h1>
+    <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
+  </header>
+  {sektionen_html}
+  <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
+</body>
+</html>"""
+
+    with open(VERLAUF_HTML, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"   📄 verlauf.html generiert ({anz_gesamt} Einträge, {len(gruppen)} Gruppen)")
+
+
+# ─────────────────────────────────────────────
+# SCHRITT 4: Hauptprogramm
 # ─────────────────────────────────────────────
 
 def main():
@@ -313,7 +728,7 @@ def main():
     if not alle_medien:
         print("ℹ️  Aktuell keine Medien ausgeliehen.")
 
-    # 2. Medien nach Rückgabedatum gruppieren
+    # 2. Nach Datum gruppieren
     medien_nach_datum = {}
     for medium in alle_medien:
         medien_nach_datum.setdefault(medium["frist"].isoformat(), []).append(medium)
@@ -340,6 +755,11 @@ def main():
     # 5. Events synchronisieren
     print("\n─── Kalender aktualisieren ───")
     sync_events(service, medien_nach_datum, bestehende_events)
+
+    # 6. Verlauf aktualisieren und HTML generieren
+    print("\n─── Verlauf aktualisieren ───")
+    verlauf_root = aktualisiere_verlauf(alle_medien)
+    generiere_html(verlauf_root)
 
     print("\n" + "═" * 55)
     print("  ✅ Sync abgeschlossen!")
