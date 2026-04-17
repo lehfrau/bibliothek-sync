@@ -381,8 +381,8 @@ def hole_cover_url(isbn):
     return ""
 
 
-def hole_tonie_cover(medium_id, titel):
-    """Sucht Cover auf tonies.club und lädt es in covers/ herunter."""
+def hole_tonie_cover(titel):
+    """Sucht Cover auf tonies.club und gibt die finale CDN-URL zurück."""
     try:
         resp = requests.get(
             "https://tonies.club/tonie/all",
@@ -396,14 +396,11 @@ def hole_tonie_cover(medium_id, titel):
         if not img or not img.get("src"):
             print(f"      ⚠️  Kein Tonie-Cover gefunden für '{titel}'")
             return ""
-        img_resp = requests.get(img["src"], timeout=10,
-                                headers={"User-Agent": "Mozilla/5.0"})
-        img_resp.raise_for_status()
-        os.makedirs(COVERS_DIR, exist_ok=True)
-        local_path = f"{COVERS_DIR}/{medium_id}.jpg"
-        with open(local_path, "wb") as f:
-            f.write(img_resp.content)
-        return local_path
+        # Redirect folgen um stabile CDN-URL zu bekommen
+        cdn_resp = requests.get(img["src"], timeout=10,
+                                headers={"User-Agent": "Mozilla/5.0"}, stream=True)
+        cdn_resp.close()
+        return cdn_resp.url
     except Exception as exc:
         print(f"      ⚠️  Tonie-Cover fehlgeschlagen für '{titel}': {exc}")
         return ""
@@ -442,7 +439,7 @@ def _hole_cover_fuer_medium(medium_id, titel, mediengruppe, isbn):
         time.sleep(2)
         return hole_cover_url(isbn)
     if mediengruppe == "Hörspielzeug" and not titel.startswith("Edurino"):
-        return hole_tonie_cover(medium_id, titel)
+        return hole_tonie_cover(titel)
     return ""
 
 
