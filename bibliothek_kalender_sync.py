@@ -15,6 +15,7 @@ Setup-Anleitung: siehe README-Abschnitt am Ende dieser Datei.
 import os
 import re
 import time
+import hashlib
 import datetime
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -58,6 +59,9 @@ ERINNERUNG_TAGE_VORHER = 3
 VERLAUF_XML  = "verlauf.xml"
 VERLAUF_HTML = "verlauf.html"
 COVERS_DIR   = "covers"
+
+# Optionaler Passwortschutz für verlauf.html (leer = kein Schutz)
+SEITEN_PASSWORT = os.environ.get("HTML_PASSWORT", "")
 
 # ─────────────────────────────────────────────
 # KONSTANTEN
@@ -600,6 +604,40 @@ def generiere_html(root):
     generiert  = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
     sektionen_html = "\n".join(sektionen)
 
+    if SEITEN_PASSWORT:
+        pw_hash = hashlib.sha256(SEITEN_PASSWORT.encode()).hexdigest()
+        pw_overlay_html = f"""<div id="pw-overlay">
+  <div id="pw-box">
+    <h2>📚 Bibliothek</h2>
+    <p>Bitte Passwort eingeben</p>
+    <input id="pw-input" type="password" placeholder="Passwort" autofocus
+           onkeydown="if(event.key==='Enter')checkPw()">
+    <button id="pw-btn" onclick="checkPw()">Weiter</button>
+    <div id="pw-error">Falsches Passwort</div>
+  </div>
+</div>"""
+        pw_script_html = f"""<script>
+  (async () => {{
+    if (sessionStorage.getItem('bib_auth') === '1')
+      document.getElementById('pw-overlay').style.display = 'none';
+  }})();
+  async function checkPw() {{
+    const val = document.getElementById('pw-input').value;
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
+    const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    if (hex === '{pw_hash}') {{
+      sessionStorage.setItem('bib_auth', '1');
+      document.getElementById('pw-overlay').style.display = 'none';
+    }} else {{
+      document.getElementById('pw-error').style.display = 'block';
+      document.getElementById('pw-input').value = '';
+    }}
+  }}
+</script>"""
+    else:
+        pw_overlay_html = ""
+        pw_script_html  = ""
+
     html = f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -722,15 +760,48 @@ def generiere_html(root):
     .verfasser {{ font-size: 0.74rem; color: #6b7280; }}
     .datum {{ font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }}
     footer {{ margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }}
+    #pw-overlay {{
+      position: fixed; inset: 0;
+      background: #f0f2f5;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }}
+    #pw-box {{
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.12);
+      text-align: center;
+      width: 320px;
+    }}
+    #pw-box h2 {{ font-size: 1.4rem; margin-bottom: 6px; }}
+    #pw-box p {{ font-size: 0.85rem; color: #6b7280; margin-bottom: 20px; }}
+    #pw-input {{
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      font-size: 1rem; outline: none;
+      transition: border-color .15s;
+    }}
+    #pw-input:focus {{ border-color: #2563eb; }}
+    #pw-btn {{
+      margin-top: 12px; width: 100%;
+      padding: 10px; border: none; border-radius: 8px;
+      background: #2563eb; color: #fff;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    }}
+    #pw-btn:hover {{ background: #1d4ed8; }}
+    #pw-error {{ color: #dc2626; font-size: 0.82rem; margin-top: 10px; display: none; }}
   </style>
 </head>
 <body>
+  {pw_overlay_html}
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
     <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
   </header>
   {sektionen_html}
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
+  {pw_script_html}
 </body>
 </html>"""
 
