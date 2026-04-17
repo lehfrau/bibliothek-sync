@@ -57,6 +57,7 @@ ERINNERUNG_TAGE_VORHER = 3
 # Verlauf-Dateien
 VERLAUF_XML  = "verlauf.xml"
 VERLAUF_HTML = "verlauf.html"
+COVERS_DIR   = "covers"
 
 # ─────────────────────────────────────────────
 # KONSTANTEN
@@ -380,6 +381,34 @@ def hole_cover_url(isbn):
     return ""
 
 
+def hole_tonie_cover(medium_id, titel):
+    """Sucht Cover auf tonies.club und lädt es in covers/ herunter."""
+    try:
+        resp = requests.get(
+            "https://tonies.club/tonie/all",
+            params={"search": titel},
+            timeout=10,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+        )
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        img = soup.find("img", class_=lambda c: c and "object-cover" in (c or "") and "h-72" in (c or ""))
+        if not img or not img.get("src"):
+            print(f"      ⚠️  Kein Tonie-Cover gefunden für '{titel}'")
+            return ""
+        img_resp = requests.get(img["src"], timeout=10,
+                                headers={"User-Agent": "Mozilla/5.0"})
+        img_resp.raise_for_status()
+        os.makedirs(COVERS_DIR, exist_ok=True)
+        local_path = f"{COVERS_DIR}/{medium_id}.jpg"
+        with open(local_path, "wb") as f:
+            f.write(img_resp.content)
+        return local_path
+    except Exception as exc:
+        print(f"      ⚠️  Tonie-Cover fehlgeschlagen für '{titel}': {exc}")
+        return ""
+
+
 def _strip_whitespace(elem):
     """Entfernt reine Whitespace-Textknoten, die minidom beim erneuten Laden multipliziert."""
     for e in elem.iter():
@@ -405,6 +434,16 @@ def speichere_verlauf(root):
     pretty = dom.toprettyxml(indent="  ", encoding="UTF-8")
     with open(VERLAUF_XML, "wb") as f:
         f.write(pretty)
+
+
+def _hole_cover_fuer_medium(medium_id, titel, mediengruppe, isbn):
+    """Wählt die passende Cover-Quelle je nach Mediengruppe."""
+    if "Buch" in mediengruppe and isbn:
+        time.sleep(2)
+        return hole_cover_url(isbn)
+    if mediengruppe == "Hörspielzeug" and not titel.startswith("Edurino"):
+        return hole_tonie_cover(medium_id, titel)
+    return ""
 
 
 def aktualisiere_verlauf(alle_medien):
@@ -435,10 +474,7 @@ def aktualisiere_verlauf(alle_medien):
             aktiv.find("letzte_frist").text = frist_str
         else:
             isbn = medium.get("isbn", "")
-            is_buch = "Buch" in medium.get("mediengruppe", "")
-            if isbn and is_buch:
-                time.sleep(2)
-            cover_url = hole_cover_url(isbn) if (isbn and is_buch) else ""
+            cover_url = _hole_cover_fuer_medium(mid, medium["titel"], medium.get("mediengruppe", ""), isbn)
             if cover_url:
                 print(f"      🖼  Cover gefunden: {medium['titel']}")
             elem = ET.SubElement(root, "medium")
@@ -454,17 +490,19 @@ def aktualisiere_verlauf(alle_medien):
             ET.SubElement(elem, "letzte_frist").text     = frist_str
             print(f"   📗 Verlauf: neu – {medium['titel']}")
 
-    # Cover nachladen für Einträge mit ISBN aber ohne Cover-URL (nur Bücher)
+    # Cover nachladen für Einträge ohne Cover-URL
     for elem in root.findall("medium"):
-        isbn = _xml_text(elem, "isbn")
         cover_node = elem.find("cover_url")
+        if cover_node is None or (cover_node.text or "").strip():
+            continue
+        mid          = _xml_text(elem, "medium_id")
+        titel        = _xml_text(elem, "titel")
         mediengruppe = _xml_text(elem, "mediengruppe")
-        if isbn and "Buch" in mediengruppe and cover_node is not None and not (cover_node.text or "").strip():
-            time.sleep(2)
-            url = hole_cover_url(isbn)
-            if url:
-                cover_node.text = url
-                print(f"      🖼  Cover nachgeladen: {_xml_text(elem, 'titel')}")
+        isbn         = _xml_text(elem, "isbn")
+        url = _hole_cover_fuer_medium(mid, titel, mediengruppe, isbn)
+        if url:
+            cover_node.text = url
+            print(f"      🖼  Cover nachgeladen: {titel}")
 
     speichere_verlauf(root)
     return root
