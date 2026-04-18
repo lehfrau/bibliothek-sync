@@ -120,6 +120,25 @@
     .verfasser { font-size: 0.74rem; color: #6b7280; }
     .datum { font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }
     footer { margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }
+    #filter-btn {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 999px;
+      background: #fff;
+      color: #374151;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    #filter-btn:hover { background: #f3f4f6; }
+    #filter-btn.aktiv {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+    #filter-btn.aktiv:hover { background: #1d4ed8; }
     #pw-overlay {
       position: fixed; inset: 0;
       background: #f0f2f5;
@@ -154,92 +173,84 @@
   </style>
 </head>
 <body>
-  <div id="pw-overlay">
-  <div id="pw-box">
-    <h2>📚 Bibliothek</h2>
-    <p>Bitte Passwort eingeben</p>
-    <input id="pw-input" type="password" placeholder="Passwort" autofocus
-           onkeydown="if(event.key==='Enter')checkPw()">
-    <button id="pw-btn" onclick="checkPw()">Weiter</button>
-    <div id="pw-error">Falsches Passwort</div>
-  </div>
-</div>
+  
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
-    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 18.04.2026 09:29</div>
+    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 18.04.2026 21:09</div>
+    <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
   </header>
   <details open>
   <summary>Kinder-Buch <span class="gruppe-anzahl">(14 · 6 ausgeliehen)</span></summary>
   <div class="raster">
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0427488" target="_blank"><img src="https://covers.openlibrary.org/b/isbn/9783480232215-L.jpg" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Alles Abenteuer mit dem kleinen Raben Socke</div><div class="verfasser">Moost, Nele; Rudolph, Annet</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0408965" target="_blank"><img src="https://covers.openlibrary.org/b/isbn/9783895652783-L.jpg" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Da kommt der Wolf!</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0574101" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Das Vorlesebuch für starke Kinder</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0408965" target="_blank"><img src="https://covers.openlibrary.org/b/isbn/9783895652783-L.jpg" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Da kommt der Wolf!</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0574101" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Das Vorlesebuch für starke Kinder</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0600910" target="_blank"><img src="https://books.google.com/books/content?id=oi_6wAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Flunkerfisch</div><div class="verfasser">Scheffler, Axel; Donaldson, Julia</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0617903" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Hundedetektiv Bruno rettet das Stadtfest</div><div class="verfasser">Hepp, Katharina</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0626269" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Kira Katze und die Sache mit dem Streit</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0473736" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Kreis, Dreieck, Elefant</div><div class="verfasser">Oikawa, Kenji; Takeuchi, Mayuko</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0473736" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Kreis, Dreieck, Elefant</div><div class="verfasser">Oikawa, Kenji; Takeuchi, Mayuko</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0591082" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Lese-Lausch-Abenteuer - Zauberwald</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0590745" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Lexikon</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0590745" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Lexikon</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0426780" target="_blank"><img src="https://books.google.com/books/content?id=LdYfnwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Meine kleine Katze</div><div class="verfasser">Teckentrup, Britta</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0474490" target="_blank"><img src="https://books.google.com/books/content?id=qWrfAQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Peterchens Mondfahrt</div><div class="verfasser">Bassewitz, Gerdt von; Knape, Wolfgang</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0635736" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Vorlesegeschichten von einem sehr besonderen Bauernhof</div><div class="verfasser">Hoëcker, Bernhard; Rupp, Dominik</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0635736" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Vorlesegeschichten von einem sehr besonderen Bauernhof</div><div class="verfasser">Hoëcker, Bernhard; Rupp, Dominik</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0609910" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Was macht die Müllabfuhr?</div><div class="verfasser">Krämer, Fee</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0488355" target="_blank"><img src="https://covers.openlibrary.org/b/isbn/9783473329380-L.jpg" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Wir entdecken Märchen</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0488355" target="_blank"><img src="https://covers.openlibrary.org/b/isbn/9783473329380-L.jpg" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Wir entdecken Märchen</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
   </div>
 </details>
 <details open>
   <summary>Tonies <span class="gruppe-anzahl">(3 · 2 ausgeliehen)</span></summary>
   <div class="raster">
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0555969" target="_blank"><img src="https://toniesclub.s3.eu-central-1.amazonaws.com/y10lhwkh3ryx3u44if069ksrutjy" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Bibi & Tina - Das Waisenfohlen</div><div class="datum">📅 17.04.2026 · 1 Tag</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0555969" target="_blank"><img src="https://toniesclub.s3.eu-central-1.amazonaws.com/y10lhwkh3ryx3u44if069ksrutjy" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Bibi & Tina - Das Waisenfohlen</div><div class="datum">📅 17.04.2026 · bis 28.04.2026</div></div></div>
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0607889" target="_blank"><img src="https://toniesclub.s3.eu-central-1.amazonaws.com/fwp894ya81upbh1brgn5f7cuyo6u" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Jonalu</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0600566" target="_blank"><img src="https://toniesclub.s3.eu-central-1.amazonaws.com/5aoy216uy80jkoc675ttb8styyja" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Trolls</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0600566" target="_blank"><img src="https://toniesclub.s3.eu-central-1.amazonaws.com/5aoy216uy80jkoc675ttb8styyja" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-cover" style="display:none">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Trolls</div><div class="datum">📅 18.04.2026 · bis 04.05.2026</div></div></div>
   </div>
 </details>
 <details open>
   <summary>Edurinos <span class="gruppe-anzahl">(2 · 1 ausgeliehen)</span></summary>
   <div class="raster">
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0607012" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Edurino: Erste Zahlen & Mengen mit Robin</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0606323" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Edurino: Kreativität und Malen mit Juki</div><div class="datum">📅 17.04.2026 · 1 Tag</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0606323" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Edurino: Kreativität und Malen mit Juki</div><div class="datum">📅 17.04.2026 · bis 28.04.2026</div></div></div>
   </div>
 </details>
 <details open>
   <summary>Kinder-CD <span class="gruppe-anzahl">(2 · 1 ausgeliehen)</span></summary>
   <div class="raster">
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0583117" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Der kleine Rabe Socke - meine große Hörspielbox</div><div class="verfasser">Moost, Nele; Rudolph, Annet</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0468224" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Jan & Henry 1</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0468224" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">Jan & Henry 1</div><div class="datum">📅 18.04.2026 · bis 04.05.2026</div></div></div>
   </div>
 </details>
 <details open>
   <summary>Spiel <span class="gruppe-anzahl">(2 · 1 ausgeliehen)</span></summary>
   <div class="raster">
 <div class="karte karte-zurueck"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0598631" target="_blank"><div class="no-cover">📚</div><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Sicher ans Ziel</div><div class="datum">📅 17.04.2026 – 18.04.2026 · 1 Tag</div></div></div>
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0589459" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Tierkacke Bingo</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0589459" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dcfce7">Benny</span></a><div class="info"><div class="titel">Tierkacke Bingo</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
   </div>
 </details>
 <details open>
   <summary>Sachbuch <span class="gruppe-anzahl">(1 · 1 ausgeliehen)</span></summary>
   <div class="raster">
-<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0627077" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">SOS Familienküche</div><div class="verfasser">Merz, Lena; Schäflein, Annina</div><div class="datum">📅 18.04.2026 · 0 Tage</div></div></div>
+<div class="karte"><a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id=0627077" target="_blank"><div class="no-cover">📚</div><span class="dot-aktiv"></span><span class="nutzer-badge" style="background:#dbeafe">Laura</span></a><div class="info"><div class="titel">SOS Familienküche</div><div class="verfasser">Merz, Lena; Schäflein, Annina</div><div class="datum">📅 18.04.2026 · bis 19.05.2026</div></div></div>
   </div>
 </details>
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
+  
   <script>
-  if (sessionStorage.getItem('bib_auth') === '1')
-    document.getElementById('pw-overlay').style.display = 'none';
-  function checkPw() {
-    const val = document.getElementById('pw-input').value;
-    let h = 0x811c9dc5;
-    for (let i = 0; i < val.length; i++)
-      h = Math.imul(h ^ val.charCodeAt(i), 0x01000193) >>> 0;
-    const hex = h.toString(16).padStart(8, '0');
-    if (hex === 'c215b7db') {
-      sessionStorage.setItem('bib_auth', '1');
-      document.getElementById('pw-overlay').style.display = 'none';
-    } else {
-      document.getElementById('pw-error').style.display = 'block';
-      document.getElementById('pw-input').value = '';
-    }
+  function applyFilter(aktiv) {
+    document.querySelectorAll('.karte-zurueck').forEach(k => k.style.display = aktiv ? 'none' : '');
+    document.querySelectorAll('details').forEach(d => {
+      const hatAktive = d.querySelectorAll('.karte:not(.karte-zurueck)').length > 0;
+      d.style.display = (aktiv && !hatAktive) ? 'none' : '';
+    });
+    const btn = document.getElementById('filter-btn');
+    btn.classList.toggle('aktiv', aktiv);
+    btn.textContent = aktiv ? 'Alle anzeigen' : 'Nur aktuell ausgeliehene';
+    sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
   }
-</script>
+  function toggleFilter() {
+    applyFilter(sessionStorage.getItem('bib_filter') !== '1');
+  }
+  applyFilter(sessionStorage.getItem('bib_filter') === '1');
+  </script>
 </body>
 </html>

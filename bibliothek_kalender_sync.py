@@ -574,6 +574,11 @@ def generiere_html(root):
         datum_zeile = fmt_datum(e["seit"])
         if e["bis"]:
             datum_zeile += f' – {fmt_datum(e["bis"])}'
+            datum_zusatz = f' · {t} {"Tag" if t == 1 else "Tage"}'
+        elif e["frist"]:
+            datum_zusatz = f' · bis {fmt_datum(e["frist"])}'
+        else:
+            datum_zusatz = ''
 
         return (
             f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}">'
@@ -585,7 +590,7 @@ def generiere_html(root):
             f'<div class="info">'
             f'<div class="titel">{e["titel"]}</div>'
             f'{verfasser_html}'
-            f'<div class="datum">📅 {datum_zeile} · {t} {"Tag" if t == 1 else "Tage"}</div>'
+            f'<div class="datum">📅 {datum_zeile}{datum_zusatz}</div>'
             f'</div>'
             f'</div>'
         )
@@ -779,6 +784,25 @@ def generiere_html(root):
     .verfasser {{ font-size: 0.74rem; color: #6b7280; }}
     .datum {{ font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }}
     footer {{ margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }}
+    #filter-btn {{
+      margin-top: 10px;
+      padding: 6px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 999px;
+      background: #fff;
+      color: #374151;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }}
+    #filter-btn:hover {{ background: #f3f4f6; }}
+    #filter-btn.aktiv {{
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }}
+    #filter-btn.aktiv:hover {{ background: #1d4ed8; }}
     #pw-overlay {{
       position: fixed; inset: 0;
       background: #f0f2f5;
@@ -817,10 +841,28 @@ def generiere_html(root):
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
     <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
+    <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
   </header>
   {sektionen_html}
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
   {pw_script_html}
+  <script>
+  function applyFilter(aktiv) {{
+    document.querySelectorAll('.karte-zurueck').forEach(k => k.style.display = aktiv ? 'none' : '');
+    document.querySelectorAll('details').forEach(d => {{
+      const hatAktive = d.querySelectorAll('.karte:not(.karte-zurueck)').length > 0;
+      d.style.display = (aktiv && !hatAktive) ? 'none' : '';
+    }});
+    const btn = document.getElementById('filter-btn');
+    btn.classList.toggle('aktiv', aktiv);
+    btn.textContent = aktiv ? 'Alle anzeigen' : 'Nur aktuell ausgeliehene';
+    sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
+  }}
+  function toggleFilter() {{
+    applyFilter(sessionStorage.getItem('bib_filter') !== '1');
+  }}
+  applyFilter(sessionStorage.getItem('bib_filter') === '1');
+  </script>
 </body>
 </html>"""
 
