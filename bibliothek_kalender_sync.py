@@ -468,16 +468,24 @@ def speichere_verlauf(root):
         f.write(pretty)
 
 
-def lade_cover_lokal(cover_url, medium_id):
-    """Lädt Cover in COVERS_DIR herunter und gibt den lokalen Pfad zurück (gecacht)."""
-    if not cover_url:
-        return ""
+def hole_dnb_cover_url(isbn):
+    """Gibt die DNB-Cover-URL für eine ISBN zurück."""
+    return f"https://portal.dnb.de/opac/mvb/cover?isbn={isbn}"
+
+
+def lade_cover_lokal(cover_url, medium_id, isbn=""):
+    """Lädt Cover von Thalia (per ISBN) in COVERS_DIR herunter (gecacht)."""
     Path(COVERS_DIR).mkdir(exist_ok=True)
     local_path = Path(COVERS_DIR) / f"{medium_id}.jpg"
     if local_path.exists():
         return str(local_path).replace("\\", "/")
+    url = hole_dnb_cover_url(isbn) if isbn else cover_url
+    if not url:
+        url = cover_url
+    if not url:
+        return ""
     try:
-        resp = requests.get(cover_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
         local_path.write_bytes(resp.content)
         return str(local_path).replace("\\", "/")
@@ -634,7 +642,7 @@ def generiere_html(root, lokal=False):
         farbe = nutzer_farben.get(e["nutzer"], "#f3f4f6")
         t = tage(e["seit"], e["bis"])
 
-        cover_src = (lade_cover_lokal(e["cover_url"], e["medium_id"]) if lokal else e["cover_url"])
+        cover_src = (lade_cover_lokal(e["cover_url"], e["medium_id"], e["isbn"]) if lokal else e["cover_url"])
         if cover_src:
             cover_img = (
                 f'<img src="{cover_src}" alt="" loading="lazy" '
