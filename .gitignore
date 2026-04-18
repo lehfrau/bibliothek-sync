@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 verlauf.xml
 verlauf.html
+verlauf_lokal.html
+covers/

@@ -55,9 +55,10 @@ KALENDER_ID = "21b41bda46bed0a74602bc0234ff02aea277e70fec21548420e4526982a02f07@
 ERINNERUNG_TAGE_VORHER = 3
 
 # Verlauf-Dateien
-VERLAUF_XML  = "verlauf.xml"
-VERLAUF_HTML = "verlauf.html"
-COVERS_DIR   = "covers"
+VERLAUF_XML        = "verlauf.xml"
+VERLAUF_HTML       = "verlauf.html"
+VERLAUF_HTML_LOKAL = "verlauf_lokal.html"
+COVERS_DIR         = "covers"
 
 # Optionaler Passwortschutz für verlauf.html (leer = kein Schutz)
 SEITEN_PASSWORT = os.environ.get("HTML_PASSWORT", "")
@@ -467,6 +468,24 @@ def speichere_verlauf(root):
         f.write(pretty)
 
 
+def lade_cover_lokal(cover_url, medium_id):
+    """Lädt Cover in COVERS_DIR herunter und gibt den lokalen Pfad zurück (gecacht)."""
+    if not cover_url:
+        return ""
+    Path(COVERS_DIR).mkdir(exist_ok=True)
+    local_path = Path(COVERS_DIR) / f"{medium_id}.jpg"
+    if local_path.exists():
+        return str(local_path).replace("\\", "/")
+    try:
+        resp = requests.get(cover_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        local_path.write_bytes(resp.content)
+        return str(local_path).replace("\\", "/")
+    except Exception as exc:
+        print(f"      ⚠️  Cover-Download fehlgeschlagen für {medium_id}: {exc}")
+        return ""
+
+
 def _hole_cover_fuer_medium(medium_id, titel, mediengruppe, isbn):
     """Wählt die passende Cover-Quelle je nach Mediengruppe."""
     if "Buch" in mediengruppe and isbn:
@@ -551,8 +570,8 @@ def aktualisiere_verlauf(alle_medien):
     return root
 
 
-def generiere_html(root):
-    """Generiert verlauf.html aus dem Verlauf-XML-Root."""
+def generiere_html(root, lokal=False):
+    """Generiert verlauf.html (lokal=False) oder verlauf_lokal.html (lokal=True)."""
     heute = datetime.date.today()
 
     eintraege = []
@@ -615,9 +634,10 @@ def generiere_html(root):
         farbe = nutzer_farben.get(e["nutzer"], "#f3f4f6")
         t = tage(e["seit"], e["bis"])
 
-        if e["cover_url"]:
+        cover_src = (lade_cover_lokal(e["cover_url"], e["medium_id"]) if lokal else e["cover_url"])
+        if cover_src:
             cover_img = (
-                f'<img src="{e["cover_url"]}" alt="" loading="lazy" '
+                f'<img src="{cover_src}" alt="" loading="lazy" '
                 f'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
                 f'<div class="no-cover" style="display:none">📚</div>'
             )
@@ -930,9 +950,10 @@ def generiere_html(root):
 </body>
 </html>"""
 
-    with open(VERLAUF_HTML, "w", encoding="utf-8") as f:
+    ziel = VERLAUF_HTML_LOKAL if lokal else VERLAUF_HTML
+    with open(ziel, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"   📄 verlauf.html generiert ({anz_gesamt} Einträge, {len(gruppen)} Gruppen)")
+    print(f"   📄 {ziel} generiert ({anz_gesamt} Einträge, {len(gruppen)} Gruppen)")
 
 
 # ─────────────────────────────────────────────
@@ -991,6 +1012,8 @@ def main():
     print("\n─── Verlauf aktualisieren ───")
     verlauf_root = aktualisiere_verlauf(alle_medien)
     generiere_html(verlauf_root)
+    if not os.environ.get("GITHUB_ACTIONS"):
+        generiere_html(verlauf_root, lokal=True)
 
     print("\n" + "═" * 55)
     print("  ✅ Sync abgeschlossen!")
