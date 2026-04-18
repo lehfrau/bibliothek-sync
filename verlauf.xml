@@ -21,7 +21,7 @@
     <isbn>9783745601244</isbn>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-04-28</letzte_frist>
   </medium>
   <medium>
@@ -45,7 +45,7 @@
     <isbn/>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-04-28</letzte_frist>
   </medium>
   <medium>
@@ -57,7 +57,7 @@
     <isbn/>
     <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/fwp894ya81upbh1brgn5f7cuyo6u</cover_url>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-04-28</letzte_frist>
   </medium>
   <medium>
@@ -69,7 +69,7 @@
     <isbn>9783845801926</isbn>
     <cover_url>https://books.google.com/books/content?id=LdYfnwEACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -81,7 +81,7 @@
     <isbn>9783480232215</isbn>
     <cover_url>https://covers.openlibrary.org/b/isbn/9783480232215-L.jpg</cover_url>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -93,7 +93,7 @@
     <isbn>9783401710099</isbn>
     <cover_url>https://books.google.com/books/content?id=qWrfAQAACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -105,7 +105,7 @@
     <isbn>9783473492787</isbn>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -117,7 +117,7 @@
     <isbn/>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -129,7 +129,7 @@
     <isbn>9783407793638</isbn>
     <cover_url>https://books.google.com/books/content?id=oi_6wAEACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -141,7 +141,7 @@
     <isbn>9783788643904</isbn>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -153,7 +153,7 @@
     <isbn>9783629011077</isbn>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
   </medium>
   <medium>
@@ -165,7 +165,127 @@
     <isbn>9783473492992</isbn>
     <cover_url/>
     <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
+    <zurueckgegeben>2026-04-18</zurueckgegeben>
     <letzte_frist>2026-05-13</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0468224</medium_id>
+    <titel>Jan &amp; Henry 1</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn/>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-04</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0600566</medium_id>
+    <titel>Trolls</titel>
+    <verfasser/>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn/>
+    <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/5aoy216uy80jkoc675ttb8styyja</cover_url>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-04</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0408965</medium_id>
+    <titel>Da kommt der Wolf!</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783895652783</isbn>
+    <cover_url>https://covers.openlibrary.org/b/isbn/9783895652783-L.jpg</cover_url>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0473736</medium_id>
+    <titel>Kreis, Dreieck, Elefant</titel>
+    <verfasser>Oikawa, Kenji; Takeuchi, Mayuko</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9780714874395</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0488355</medium_id>
+    <titel>Wir entdecken Märchen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783473329380</isbn>
+    <cover_url>https://covers.openlibrary.org/b/isbn/9783473329380-L.jpg</cover_url>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0574101</medium_id>
+    <titel>Das Vorlesebuch für starke Kinder</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783522306041</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0590745</medium_id>
+    <titel>Lexikon</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783473492732</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0627077</medium_id>
+    <titel>SOS Familienküche</titel>
+    <verfasser>Merz, Lena; Schäflein, Annina</verfasser>
+    <mediengruppe>Sachbuch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783833896484</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0635736</medium_id>
+    <titel>Vorlesegeschichten von einem sehr besonderen Bauernhof</titel>
+    <verfasser>Hoëcker, Bernhard; Rupp, Dominik</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Laura</nutzer>
+    <isbn>9783480240838</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
+  </medium>
+  <medium>
+    <medium_id>0589459</medium_id>
+    <titel>Tierkacke Bingo</titel>
+    <verfasser/>
+    <mediengruppe>Spiel</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783962441722</isbn>
+    <cover_url/>
+    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
+    <zurueckgegeben/>
+    <letzte_frist>2026-05-19</letzte_frist>
   </medium>
 </verlauf>
