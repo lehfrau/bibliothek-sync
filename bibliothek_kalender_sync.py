@@ -349,6 +349,36 @@ def _xml_text(element, tag):
     return (child.text or "") if child is not None else ""
 
 
+def _aktive_ausleihe(medium_elem):
+    """Gibt die aktive <ausleihe> zurück (ohne <zurueck>-Datum), oder None."""
+    ausleihen = medium_elem.find("ausleihen")
+    if ausleihen is None:
+        return None
+    for a in ausleihen.findall("ausleihe"):
+        if not (_xml_text(a, "zurueck")).strip():
+            return a
+    return None
+
+
+def _migriere_wenn_noetig(root):
+    """Konvertiert altes Flat-Format (ausgeliehen_seit/zurueckgegeben/letzte_frist) zum neuen <ausleihen>-Format."""
+    for elem in root.findall("medium"):
+        if elem.find("ausgeliehen_seit") is None:
+            continue
+        seit    = _xml_text(elem, "ausgeliehen_seit")
+        zurueck = _xml_text(elem, "zurueckgegeben")
+        frist   = _xml_text(elem, "letzte_frist")
+        for tag in ("ausgeliehen_seit", "zurueckgegeben", "letzte_frist"):
+            old = elem.find(tag)
+            if old is not None:
+                elem.remove(old)
+        ausleihen = ET.SubElement(elem, "ausleihen")
+        ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+        ET.SubElement(ausleihe, "seit").text    = seit
+        ET.SubElement(ausleihe, "zurueck").text = zurueck
+        ET.SubElement(ausleihe, "frist").text   = frist
+
+
 def hole_cover_url(isbn):
     """Sucht Cover bei Open Library (primär) oder Google Books (Fallback)."""
     if not isbn:
@@ -423,6 +453,7 @@ def lade_verlauf():
     if Path(VERLAUF_XML).exists():
         root = ET.parse(VERLAUF_XML).getroot()
         _strip_whitespace(root)
+        _migriere_wenn_noetig(root)
         return root
     return ET.Element("verlauf")
 
@@ -454,40 +485,52 @@ def aktualisiere_verlauf(alle_medien):
 
     # Rückgaben markieren
     for elem in root.findall("medium"):
-        if not _xml_text(elem, "zurueckgegeben") and _xml_text(elem, "medium_id") not in aktuelle_ids:
-            elem.find("zurueckgegeben").text = heute
-            print(f"   📕 Verlauf: zurückgegeben – {_xml_text(elem, 'titel')}")
+        if _xml_text(elem, "medium_id") not in aktuelle_ids:
+            aktiv = _aktive_ausleihe(elem)
+            if aktiv is not None:
+                aktiv.find("zurueck").text = heute
+                print(f"   📕 Verlauf: zurückgegeben – {_xml_text(elem, 'titel')}")
 
     # Neue Medien eintragen / Frist aktualisieren
     for medium in alle_medien:
         mid = medium["medium_id"]
         frist_str = medium["frist"].isoformat()
 
-        # Aktiven Eintrag suchen (noch nicht zurückgegeben)
-        aktiv = next(
-            (e for e in root.findall("medium")
-             if _xml_text(e, "medium_id") == mid and not _xml_text(e, "zurueckgegeben")),
+        medium_elem = next(
+            (e for e in root.findall("medium") if _xml_text(e, "medium_id") == mid),
             None
         )
 
-        if aktiv is not None:
-            aktiv.find("letzte_frist").text = frist_str
+        if medium_elem is not None:
+            aktiv = _aktive_ausleihe(medium_elem)
+            if aktiv is not None:
+                aktiv.find("frist").text = frist_str
+            else:
+                # Erneute Ausleihe desselben Mediums
+                ausleihen = medium_elem.find("ausleihen")
+                ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+                ET.SubElement(ausleihe, "seit").text    = heute
+                ET.SubElement(ausleihe, "zurueck").text = ""
+                ET.SubElement(ausleihe, "frist").text   = frist_str
+                print(f"   📗 Verlauf: erneut ausgeliehen – {_xml_text(medium_elem, 'titel')}")
         else:
             isbn = medium.get("isbn", "")
             cover_url = _hole_cover_fuer_medium(mid, medium["titel"], medium.get("mediengruppe", ""), isbn)
             if cover_url:
                 print(f"      🖼  Cover gefunden: {medium['titel']}")
             elem = ET.SubElement(root, "medium")
-            ET.SubElement(elem, "medium_id").text       = mid
-            ET.SubElement(elem, "titel").text            = medium["titel"]
-            ET.SubElement(elem, "verfasser").text        = medium.get("verfasser", "")
-            ET.SubElement(elem, "mediengruppe").text     = medium.get("mediengruppe", "")
-            ET.SubElement(elem, "nutzer").text           = medium["name"]
-            ET.SubElement(elem, "isbn").text             = isbn
-            ET.SubElement(elem, "cover_url").text        = cover_url
-            ET.SubElement(elem, "ausgeliehen_seit").text = heute
-            ET.SubElement(elem, "zurueckgegeben").text   = ""
-            ET.SubElement(elem, "letzte_frist").text     = frist_str
+            ET.SubElement(elem, "medium_id").text   = mid
+            ET.SubElement(elem, "titel").text        = medium["titel"]
+            ET.SubElement(elem, "verfasser").text    = medium.get("verfasser", "")
+            ET.SubElement(elem, "mediengruppe").text = medium.get("mediengruppe", "")
+            ET.SubElement(elem, "nutzer").text       = medium["name"]
+            ET.SubElement(elem, "isbn").text         = isbn
+            ET.SubElement(elem, "cover_url").text    = cover_url
+            ausleihen = ET.SubElement(elem, "ausleihen")
+            ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+            ET.SubElement(ausleihe, "seit").text    = heute
+            ET.SubElement(ausleihe, "zurueck").text = ""
+            ET.SubElement(ausleihe, "frist").text   = frist_str
             print(f"   📗 Verlauf: neu – {medium['titel']}")
 
     # Cover nachladen für Einträge ohne Cover-URL
@@ -514,6 +557,14 @@ def generiere_html(root):
 
     eintraege = []
     for elem in root.findall("medium"):
+        ausleihen_elem = elem.find("ausleihen")
+        if ausleihen_elem is None:
+            continue
+        alle_ausleihen = ausleihen_elem.findall("ausleihe")
+        if not alle_ausleihen:
+            continue
+        aktive = next((a for a in alle_ausleihen if not _xml_text(a, "zurueck").strip()), None)
+        referenz = aktive if aktive is not None else alle_ausleihen[-1]
         eintraege.append({
             "medium_id":    _xml_text(elem, "medium_id"),
             "titel":        _xml_text(elem, "titel"),
@@ -522,9 +573,13 @@ def generiere_html(root):
             "nutzer":       _xml_text(elem, "nutzer"),
             "isbn":         _xml_text(elem, "isbn"),
             "cover_url":    _xml_text(elem, "cover_url"),
-            "seit":         _xml_text(elem, "ausgeliehen_seit"),
-            "bis":          _xml_text(elem, "zurueckgegeben"),
-            "frist":        _xml_text(elem, "letzte_frist"),
+            "seit":         _xml_text(referenz, "seit"),
+            "bis":          _xml_text(referenz, "zurueck"),
+            "frist":        _xml_text(referenz, "frist"),
+            "ausleihen":    [
+                {"seit": _xml_text(a, "seit"), "zurueck": _xml_text(a, "zurueck"), "frist": _xml_text(a, "frist")}
+                for a in alle_ausleihen
+            ],
         })
 
     eintraege.sort(key=lambda x: (x["mediengruppe"].lower(), x["titel"].lower()))
@@ -571,14 +626,22 @@ def generiere_html(root):
 
         dot = '<span class="dot-aktiv"></span>' if ist_aktiv else ''
         verfasser_html = f'<div class="verfasser">{e["verfasser"]}</div>' if e["verfasser"] else ""
-        datum_zeile = fmt_datum(e["seit"])
-        if e["bis"]:
-            datum_zeile += f' – {fmt_datum(e["bis"])}'
-            datum_zusatz = f' · {t} {"Tag" if t == 1 else "Tage"}'
-        elif e["frist"]:
-            datum_zusatz = f' · bis {fmt_datum(e["frist"])}'
-        else:
-            datum_zusatz = ''
+        def fmt_ausleihe_zeile(a, aktuell):
+            zeile = fmt_datum(a["seit"])
+            if a["zurueck"]:
+                zeile += f' – {fmt_datum(a["zurueck"])}'
+                zusatz = f' · {tage(a["seit"], a["zurueck"])} {"Tag" if tage(a["seit"], a["zurueck"]) == 1 else "Tage"}'
+            elif a["frist"]:
+                zusatz = f' · bis {fmt_datum(a["frist"])}'
+            else:
+                zusatz = ''
+            css = "datum" if aktuell else "datum datum-alt"
+            return f'<div class="{css}">📅 {zeile}{zusatz}</div>'
+
+        ausleihen_html = "".join(
+            fmt_ausleihe_zeile(a, i == len(e["ausleihen"]) - 1)
+            for i, a in enumerate(e["ausleihen"])
+        )
 
         return (
             f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}">'
@@ -590,7 +653,7 @@ def generiere_html(root):
             f'<div class="info">'
             f'<div class="titel">{e["titel"]}</div>'
             f'{verfasser_html}'
-            f'<div class="datum">📅 {datum_zeile}{datum_zusatz}</div>'
+            f'{ausleihen_html}'
             f'</div>'
             f'</div>'
         )
@@ -783,6 +846,7 @@ def generiere_html(root):
     }}
     .verfasser {{ font-size: 0.74rem; color: #6b7280; }}
     .datum {{ font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }}
+    .datum-alt {{ font-size: 0.65rem; color: #d1d5db; }}
     footer {{ margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }}
     #filter-btn {{
       margin-top: 10px;
