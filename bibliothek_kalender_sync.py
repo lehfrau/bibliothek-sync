@@ -720,7 +720,7 @@ def generiere_html(root, lokal=False):
         )
 
         return (
-            f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}">'
+            f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}" data-nutzer="{e["nutzer"].lower()}">'
             f'<a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id={e["medium_id"]}" target="_blank">'
             f'{cover_img}'
             f'{dot}'
@@ -758,6 +758,7 @@ def generiere_html(root, lokal=False):
     anz_gesamt = len(eintraege)
     anz_aktiv  = sum(1 for e in eintraege if not e["bis"])
     generiert  = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    alle_nutzer = sorted({e["nutzer"] for e in eintraege})
     sektionen_html = "\n".join(sektionen)
 
     if SEITEN_PASSWORT:
@@ -943,6 +944,23 @@ def generiere_html(root, lokal=False):
       color: #fff;
     }}
     #filter-btn.aktiv:hover {{ background: #1d4ed8; }}
+    .nutzer-filter-btn {{
+      padding: 6px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 999px;
+      background: #fff;
+      color: #374151;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }}
+    .nutzer-filter-btn:hover {{ background: #f3f4f6; }}
+    .nutzer-filter-btn.aktiv {{
+      background: #374151;
+      border-color: #374151;
+      color: #fff;
+    }}
     #pw-overlay {{
       position: fixed; inset: 0;
       background: #f0f2f5;
@@ -998,6 +1016,7 @@ def generiere_html(root, lokal=False):
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
       <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applySearch(this.value)">
       <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+      {"".join(f'<button class="nutzer-filter-btn" data-n="{n.lower()}" onclick="toggleNutzer(this)">{n}</button>' for n in alle_nutzer)}
       <a href="statistik.html" style="font-size:0.82rem;color:#6b7280;text-decoration:none;margin-left:4px">📊 Statistik</a>
     </div>
   </header>
@@ -1008,12 +1027,14 @@ def generiere_html(root, lokal=False):
   function applyVisibility() {{
     const q = (document.getElementById('suche').value || '').toLowerCase().trim();
     const nurAktiv = sessionStorage.getItem('bib_filter') === '1';
+    const nurNutzer = sessionStorage.getItem('bib_nutzer') || '';
     document.querySelectorAll('.karte').forEach(k => {{
       const titel = (k.querySelector('.titel')?.textContent || '').toLowerCase();
       const verf  = (k.querySelector('.verfasser')?.textContent || '').toLowerCase();
-      const matchSuche = !q || titel.includes(q) || verf.includes(q);
+      const matchSuche  = !q || titel.includes(q) || verf.includes(q);
       const matchFilter = !nurAktiv || !k.classList.contains('karte-zurueck');
-      k.style.display = (matchSuche && matchFilter) ? '' : 'none';
+      const matchNutzer = !nurNutzer || k.dataset.nutzer === nurNutzer;
+      k.style.display = (matchSuche && matchFilter && matchNutzer) ? '' : 'none';
     }});
     document.querySelectorAll('details').forEach(d => {{
       const hatSichtbare = [...d.querySelectorAll('.karte')].some(k => k.style.display !== 'none');
@@ -1031,7 +1052,17 @@ def generiere_html(root, lokal=False):
   function toggleFilter() {{
     applyFilter(sessionStorage.getItem('bib_filter') !== '1');
   }}
+  function toggleNutzer(btn) {{
+    const n = btn.dataset.n;
+    const aktiv = sessionStorage.getItem('bib_nutzer') === n;
+    sessionStorage.setItem('bib_nutzer', aktiv ? '' : n);
+    document.querySelectorAll('.nutzer-filter-btn').forEach(b => b.classList.remove('aktiv'));
+    if (!aktiv) btn.classList.add('aktiv');
+    applyVisibility();
+  }}
   applyFilter(sessionStorage.getItem('bib_filter') === '1');
+  const _n = sessionStorage.getItem('bib_nutzer');
+  if (_n) {{ const b = document.querySelector(`.nutzer-filter-btn[data-n="${{_n}}"]`); if (b) b.classList.add('aktiv'); applyVisibility(); }}
   </script>
 </body>
 </html>"""

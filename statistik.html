@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bibliothek Statistik</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #111827; padding: 24px 16px; }
+    header { text-align: center; margin-bottom: 28px; }
+    header h1 { font-size: 1.6rem; font-weight: 700; }
+    header .subtitle { font-size: 0.82rem; color: #6b7280; margin-top: 4px; }
+    .nav { text-align: center; margin-bottom: 24px; }
+    .nav a { font-size: 0.85rem; color: #3b82f6; text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 960px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
+    .card h2 { font-size: 0.95rem; font-weight: 700; color: #374151; margin-bottom: 16px; }
+    .kpi-grid { display: flex; gap: 16px; flex-wrap: wrap; max-width: 960px; margin: 0 auto 16px; }
+    .kpi { background: #fff; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 120px; text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
+    .kpi .val { font-size: 2rem; font-weight: 800; }
+    .kpi .lbl { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bar-label { font-size: 0.82rem; min-width: 110px; color: #374151; }
+    .bar-track { flex: 1; background: #f3f4f6; border-radius: 999px; height: 10px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width .4s; }
+    .bar-val { font-size: 0.8rem; color: #6b7280; min-width: 24px; text-align: right; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    td { padding: 6px 4px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .mt-titel { max-width: 180px; word-break: break-word; color: #111827; }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 0.72rem; margin: 2px 2px 0 0; white-space: nowrap; }
+    footer { text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 28px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Bibliothek Statistik</h1>
+    <div class="subtitle">Stand 19.04.2026 · 24 Ausleihen gesamt</div>
+  </header>
+  <div class="nav"><a href="verlauf.html">← Zurück zum Verlauf</a></div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="val" style="color:#22c55e">15</div><div class="lbl">Benny</div></div><div class="kpi"><div class="val" style="color:#3b82f6">9</div><div class="lbl">Laura</div></div>
+    <div class="kpi"><div class="val" style="color:#6366f1">5</div><div class="lbl">Medientypen</div></div>
+    <div class="kpi"><div class="val" style="color:#f59e0b">1</div><div class="lbl">Monate aktiv</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Ausleihen pro Nutzer</h2>
+      <div class="bar-row"><span class="bar-label">Benny</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#22c55e"></div></div><span class="bar-val">15</span></div><div class="bar-row"><span class="bar-label">Laura</span><div class="bar-track"><div class="bar-fill" style="width:60%;background:#3b82f6"></div></div><span class="bar-val">9</span></div>
+    </div>
+    <div class="card">
+      <h2>Mediengruppen</h2>
+      <div style="margin-bottom:14px"><div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">Kinder-Buch</div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#22c55e">Benny</span><div class="bar-track"><div class="bar-fill" style="width:57%;background:#22c55e"></div></div><span class="bar-val">8</span></div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#3b82f6">Laura</span><div class="bar-track"><div class="bar-fill" style="width:42%;background:#3b82f6"></div></div><span class="bar-val">6</span></div></div><div style="margin-bottom:14px"><div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">Hörspielzeug</div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#22c55e">Benny</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:#22c55e"></div></div><span class="bar-val">4</span></div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#3b82f6">Laura</span><div class="bar-track"><div class="bar-fill" style="width:7%;background:#3b82f6"></div></div><span class="bar-val">1</span></div></div><div style="margin-bottom:14px"><div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">Kinder-CD</div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#22c55e">Benny</span><div class="bar-track"><div class="bar-fill" style="width:7%;background:#22c55e"></div></div><span class="bar-val">1</span></div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#3b82f6">Laura</span><div class="bar-track"><div class="bar-fill" style="width:7%;background:#3b82f6"></div></div><span class="bar-val">1</span></div></div><div style="margin-bottom:14px"><div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">Spiel</div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#22c55e">Benny</span><div class="bar-track"><div class="bar-fill" style="width:14%;background:#22c55e"></div></div><span class="bar-val">2</span></div></div><div style="margin-bottom:14px"><div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">Sachbuch</div><div class="bar-row" style="margin-bottom:4px"><span class="bar-label" style="min-width:60px;font-size:0.75rem;color:#3b82f6">Laura</span><div class="bar-track"><div class="bar-fill" style="width:7%;background:#3b82f6"></div></div><span class="bar-val">1</span></div></div>
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h2>Ausleihen pro Monat</h2>
+      <div class="bar-row"><span class="bar-label">2026-04</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#f59e0b"></div></div><span class="bar-val">24</span></div>
+    </div>
+    <div class="card"><h2>Ø Ausleihdauer</h2><table><tr><td style="color:#22c55e;font-weight:600">Benny</td><td>1.0 Tage</td><td style="color:#9ca3af">(aus 12 Ausleihen)</td></tr></table></div>
+    
+  </div>
+
+  <footer>Generiert am 19.04.2026</footer>
+</body>
+</html>
