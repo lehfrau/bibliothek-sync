@@ -8,9 +8,13 @@
     <nutzer>Benny</nutzer>
     <isbn/>
     <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/y10lhwkh3ryx3u44if069ksrutjy</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-04-28</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck/>
+        <frist>2026-04-28</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0583117</medium_id>
@@ -20,9 +24,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783745601244</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-04-28</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-04-28</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0606323</medium_id>
@@ -32,9 +40,13 @@
     <nutzer>Benny</nutzer>
     <isbn/>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-04-28</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck/>
+        <frist>2026-04-28</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0607012</medium_id>
@@ -44,9 +56,13 @@
     <nutzer>Benny</nutzer>
     <isbn/>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-04-28</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-04-28</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0607889</medium_id>
@@ -56,9 +72,13 @@
     <nutzer>Benny</nutzer>
     <isbn/>
     <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/fwp894ya81upbh1brgn5f7cuyo6u</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-04-28</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-04-28</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0426780</medium_id>
@@ -68,9 +88,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783845801926</isbn>
     <cover_url>https://books.google.com/books/content?id=LdYfnwEACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0427488</medium_id>
@@ -80,9 +104,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783480232215</isbn>
     <cover_url>https://covers.openlibrary.org/b/isbn/9783480232215-L.jpg</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0474490</medium_id>
@@ -92,9 +120,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783401710099</isbn>
     <cover_url>https://books.google.com/books/content?id=qWrfAQAACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0591082</medium_id>
@@ -104,9 +136,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783473492787</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0598631</medium_id>
@@ -116,9 +152,13 @@
     <nutzer>Benny</nutzer>
     <isbn/>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0600910</medium_id>
@@ -128,9 +168,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783407793638</isbn>
     <cover_url>https://books.google.com/books/content?id=oi_6wAEACAAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;source=gbs_api</cover_url>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0609910</medium_id>
@@ -140,9 +184,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783788643904</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0617903</medium_id>
@@ -152,9 +200,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783629011077</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0626269</medium_id>
@@ -164,9 +216,13 @@
     <nutzer>Benny</nutzer>
     <isbn>9783473492992</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-17</ausgeliehen_seit>
-    <zurueckgegeben>2026-04-18</zurueckgegeben>
-    <letzte_frist>2026-05-13</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-17</seit>
+        <zurueck>2026-04-18</zurueck>
+        <frist>2026-05-13</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0468224</medium_id>
@@ -176,9 +232,13 @@
     <nutzer>Laura</nutzer>
     <isbn/>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-04</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-04</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0600566</medium_id>
@@ -188,9 +248,13 @@
     <nutzer>Laura</nutzer>
     <isbn/>
     <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/5aoy216uy80jkoc675ttb8styyja</cover_url>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-04</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-04</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0408965</medium_id>
@@ -200,9 +264,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783895652783</isbn>
     <cover_url>https://covers.openlibrary.org/b/isbn/9783895652783-L.jpg</cover_url>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0473736</medium_id>
@@ -212,9 +280,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9780714874395</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0488355</medium_id>
@@ -224,9 +296,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783473329380</isbn>
     <cover_url>https://covers.openlibrary.org/b/isbn/9783473329380-L.jpg</cover_url>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0574101</medium_id>
@@ -236,9 +312,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783522306041</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0590745</medium_id>
@@ -248,9 +328,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783473492732</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0627077</medium_id>
@@ -260,9 +344,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783833896484</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0635736</medium_id>
@@ -272,9 +360,13 @@
     <nutzer>Laura</nutzer>
     <isbn>9783480240838</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
   <medium>
     <medium_id>0589459</medium_id>
@@ -284,8 +376,12 @@
     <nutzer>Benny</nutzer>
     <isbn>9783962441722</isbn>
     <cover_url/>
-    <ausgeliehen_seit>2026-04-18</ausgeliehen_seit>
-    <zurueckgegeben/>
-    <letzte_frist>2026-05-19</letzte_frist>
+    <ausleihen>
+      <ausleihe>
+        <seit>2026-04-18</seit>
+        <zurueck/>
+        <frist>2026-05-19</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
 </verlauf>

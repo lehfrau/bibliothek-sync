@@ -119,6 +119,7 @@
     }
     .verfasser { font-size: 0.74rem; color: #6b7280; }
     .datum { font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }
+    .datum-alt { font-size: 0.65rem; color: #d1d5db; }
     footer { margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }
     #filter-btn {
       margin-top: 10px;
@@ -173,10 +174,19 @@
   </style>
 </head>
 <body>
-  
+  <div id="pw-overlay">
+  <div id="pw-box">
+    <h2>📚 Bibliothek</h2>
+    <p>Bitte Passwort eingeben</p>
+    <input id="pw-input" type="password" placeholder="Passwort" autofocus
+           onkeydown="if(event.key==='Enter')checkPw()">
+    <button id="pw-btn" onclick="checkPw()">Weiter</button>
+    <div id="pw-error">Falsches Passwort</div>
+  </div>
+</div>
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
-    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 18.04.2026 21:09</div>
+    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 19.04.2026 05:27</div>
     <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
   </header>
   <details open>
@@ -234,7 +244,24 @@
   </div>
 </details>
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
-  
+  <script>
+  if (sessionStorage.getItem('bib_auth') === '1')
+    document.getElementById('pw-overlay').style.display = 'none';
+  function checkPw() {
+    const val = document.getElementById('pw-input').value;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < val.length; i++)
+      h = Math.imul(h ^ val.charCodeAt(i), 0x01000193) >>> 0;
+    const hex = h.toString(16).padStart(8, '0');
+    if (hex === 'c215b7db') {
+      sessionStorage.setItem('bib_auth', '1');
+      document.getElementById('pw-overlay').style.display = 'none';
+    } else {
+      document.getElementById('pw-error').style.display = 'block';
+      document.getElementById('pw-input').value = '';
+    }
+  }
+</script>
   <script>
   function applyFilter(aktiv) {
     document.querySelectorAll('.karte-zurueck').forEach(k => k.style.display = aktiv ? 'none' : '');
