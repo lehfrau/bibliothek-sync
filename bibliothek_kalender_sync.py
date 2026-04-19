@@ -71,6 +71,9 @@ SEITEN_PASSWORT = os.environ.get("HTML_PASSWORT", "")
 LOGIN_URL = "https://katalog.halle.de/Mein-Konto"
 SCOPES    = ["https://www.googleapis.com/auth/calendar"]
 
+NUTZER_FARBEN_VERLAUF    = {"Laura": "#dbeafe", "Benny": "#dcfce7"}
+NUTZER_FARBEN_STATISTIK  = {"Laura": "#3b82f6", "Benny": "#22c55e"}
+
 
 # ─────────────────────────────────────────────
 # SCHRITT 1: Bibliothekskonto scrapen
@@ -673,8 +676,6 @@ def generiere_html(root, lokal=False):
         except (ValueError, TypeError):
             return 0
 
-    nutzer_farben = {"Laura": "#dbeafe", "Benny": "#dcfce7"}
-
     def display_gruppe(e):
         if e["mediengruppe"] == "Hörspielzeug":
             return "Edurinos" if e["titel"].startswith("Edurino") else "Tonies"
@@ -687,7 +688,7 @@ def generiere_html(root, lokal=False):
 
     def karte_html(e):
         ist_aktiv = not e["bis"]
-        farbe = nutzer_farben.get(e["nutzer"], "#f3f4f6")
+        farbe = NUTZER_FARBEN_VERLAUF.get(e["nutzer"], "#f3f4f6")
         t = tage(e["seit"], e["bis"])
 
         cover_src = (e["cover_lokal"] or e["cover_url"]) if lokal else e["cover_url"]
@@ -925,8 +926,7 @@ def generiere_html(root, lokal=False):
     .datum {{ font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }}
     .datum-alt {{ font-size: 0.65rem; color: #d1d5db; }}
     footer {{ margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }}
-    #filter-btn {{
-      margin-top: 10px;
+    #aktiv-filter-btn {{
       padding: 6px 14px;
       border: 1.5px solid #d1d5db;
       border-radius: 999px;
@@ -937,13 +937,13 @@ def generiere_html(root, lokal=False):
       cursor: pointer;
       transition: background .15s, border-color .15s, color .15s;
     }}
-    #filter-btn:hover {{ background: #f3f4f6; }}
-    #filter-btn.aktiv {{
+    #aktiv-filter-btn:hover {{ background: #f3f4f6; }}
+    #aktiv-filter-btn.aktiv {{
       background: #2563eb;
       border-color: #2563eb;
       color: #fff;
     }}
-    #filter-btn.aktiv:hover {{ background: #1d4ed8; }}
+    #aktiv-filter-btn.aktiv:hover {{ background: #1d4ed8; }}
     .nutzer-filter-btn {{
       padding: 6px 14px;
       border: 1.5px solid #d1d5db;
@@ -993,7 +993,6 @@ def generiere_html(root, lokal=False):
     #pw-btn:hover {{ background: #1d4ed8; }}
     #pw-error {{ color: #dc2626; font-size: 0.82rem; margin-top: 10px; display: none; }}
     #suche {{
-      margin-top: 12px;
       width: 100%;
       max-width: 420px;
       padding: 8px 14px 8px 36px;
@@ -1003,7 +1002,6 @@ def generiere_html(root, lokal=False):
       outline: none;
       background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239ca3af' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
       transition: border-color .15s;
-      display: block;
     }}
     #suche:focus {{ border-color: #2563eb; }}
   </style>
@@ -1014,8 +1012,8 @@ def generiere_html(root, lokal=False):
     <h1>📚 Bibliothek Verlauf</h1>
     <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-      <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applySearch(this.value)">
-      <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+      <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applyVisibility()">
+      <button id="aktiv-filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
       {"".join(f'<button class="nutzer-filter-btn" data-n="{n.lower()}" onclick="toggleNutzer(this)">{n}</button>' for n in alle_nutzer)}
       <a href="statistik.html" style="font-size:0.82rem;color:#6b7280;text-decoration:none;margin-left:4px">📊 Statistik</a>
     </div>
@@ -1041,10 +1039,9 @@ def generiere_html(root, lokal=False):
       d.style.display = hatSichtbare ? '' : 'none';
     }});
   }}
-  function applySearch(val) {{ applyVisibility(); }}
   function applyFilter(aktiv) {{
     sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
-    const btn = document.getElementById('filter-btn');
+    const btn = document.getElementById('aktiv-filter-btn');
     btn.classList.toggle('aktiv', aktiv);
     btn.textContent = aktiv ? 'Alle anzeigen' : 'Nur aktuell ausgeliehene';
     applyVisibility();
@@ -1141,9 +1138,8 @@ def generiere_statistik_html(root):
     mehrfach = {t: v for t, v in ausleihen_pro_medium.items() if len(v) > 1}
     mehrfach = dict(sorted(mehrfach.items(), key=lambda x: -len(x[1])))
 
-    nutzer_farben = {"Laura": "#3b82f6", "Benny": "#22c55e"}
     def farbe(n):
-        return nutzer_farben.get(n, "#a78bfa")
+        return NUTZER_FARBEN_STATISTIK.get(n, "#a78bfa")
 
     def balken_html(items, farbe_fn, max_val=None):
         if not items:

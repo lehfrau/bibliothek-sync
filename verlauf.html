@@ -121,8 +121,7 @@
     .datum { font-size: 0.7rem; color: #9ca3af; margin-top: 2px; }
     .datum-alt { font-size: 0.65rem; color: #d1d5db; }
     footer { margin-top: 32px; text-align: center; font-size: 0.78rem; color: #9ca3af; }
-    #filter-btn {
-      margin-top: 10px;
+    #aktiv-filter-btn {
       padding: 6px 14px;
       border: 1.5px solid #d1d5db;
       border-radius: 999px;
@@ -133,13 +132,13 @@
       cursor: pointer;
       transition: background .15s, border-color .15s, color .15s;
     }
-    #filter-btn:hover { background: #f3f4f6; }
-    #filter-btn.aktiv {
+    #aktiv-filter-btn:hover { background: #f3f4f6; }
+    #aktiv-filter-btn.aktiv {
       background: #2563eb;
       border-color: #2563eb;
       color: #fff;
     }
-    #filter-btn.aktiv:hover { background: #1d4ed8; }
+    #aktiv-filter-btn.aktiv:hover { background: #1d4ed8; }
     .nutzer-filter-btn {
       padding: 6px 14px;
       border: 1.5px solid #d1d5db;
@@ -189,7 +188,6 @@
     #pw-btn:hover { background: #1d4ed8; }
     #pw-error { color: #dc2626; font-size: 0.82rem; margin-top: 10px; display: none; }
     #suche {
-      margin-top: 12px;
       width: 100%;
       max-width: 420px;
       padding: 8px 14px 8px 36px;
@@ -199,7 +197,6 @@
       outline: none;
       background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239ca3af' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
       transition: border-color .15s;
-      display: block;
     }
     #suche:focus { border-color: #2563eb; }
   </style>
@@ -208,10 +205,10 @@
   
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
-    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 19.04.2026 21:35</div>
+    <div class="subtitle">24 Medien insgesamt · 12 aktuell ausgeliehen · Stand 19.04.2026 21:44</div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-      <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applySearch(this.value)">
-      <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+      <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applyVisibility()">
+      <button id="aktiv-filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
       <button class="nutzer-filter-btn" data-n="benny" onclick="toggleNutzer(this)">Benny</button><button class="nutzer-filter-btn" data-n="laura" onclick="toggleNutzer(this)">Laura</button>
       <a href="statistik.html" style="font-size:0.82rem;color:#6b7280;text-decoration:none;margin-left:4px">📊 Statistik</a>
     </div>
@@ -290,10 +287,9 @@
       d.style.display = hatSichtbare ? '' : 'none';
     });
   }
-  function applySearch(val) { applyVisibility(); }
   function applyFilter(aktiv) {
     sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
-    const btn = document.getElementById('filter-btn');
+    const btn = document.getElementById('aktiv-filter-btn');
     btn.classList.toggle('aktiv', aktiv);
     btn.textContent = aktiv ? 'Alle anzeigen' : 'Nur aktuell ausgeliehene';
     applyVisibility();
