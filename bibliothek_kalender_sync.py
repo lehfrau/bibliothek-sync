@@ -58,6 +58,7 @@ ERINNERUNG_TAGE_VORHER = 3
 VERLAUF_XML        = "verlauf.xml"
 VERLAUF_HTML       = "verlauf.html"
 VERLAUF_HTML_LOKAL = "verlauf_lokal.html"
+VERLAUF_STATISTIK  = "statistik.html"
 COVERS_DIR         = "covers"
 
 # Optionaler Passwortschutz für verlauf.html (leer = kein Schutz)
@@ -366,6 +367,7 @@ def _migriere_wenn_noetig(root):
     for elem in root.findall("medium"):
         if elem.find("ausgeliehen_seit") is None:
             continue
+        nutzer  = _xml_text(elem, "nutzer")
         seit    = _xml_text(elem, "ausgeliehen_seit")
         zurueck = _xml_text(elem, "zurueckgegeben")
         frist   = _xml_text(elem, "letzte_frist")
@@ -375,9 +377,24 @@ def _migriere_wenn_noetig(root):
                 elem.remove(old)
         ausleihen = ET.SubElement(elem, "ausleihen")
         ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+        ET.SubElement(ausleihe, "nutzer").text  = nutzer
         ET.SubElement(ausleihe, "seit").text    = seit
         ET.SubElement(ausleihe, "zurueck").text = zurueck
         ET.SubElement(ausleihe, "frist").text   = frist
+
+
+def _migriere_nutzer_in_ausleihe(root):
+    """Fügt <nutzer> in bestehende <ausleihe>-Einträge ein, die ihn noch nicht haben."""
+    for elem in root.findall("medium"):
+        nutzer = _xml_text(elem, "nutzer")
+        ausleihen = elem.find("ausleihen")
+        if ausleihen is None:
+            continue
+        for a in ausleihen.findall("ausleihe"):
+            if a.find("nutzer") is None:
+                nutzer_elem = ET.Element("nutzer")
+                nutzer_elem.text = nutzer
+                a.insert(0, nutzer_elem)
 
 
 def hole_cover_url(isbn):
@@ -464,6 +481,7 @@ def lade_verlauf():
         root = ET.parse(VERLAUF_XML).getroot()
         _strip_whitespace(root)
         _migriere_wenn_noetig(root)
+        _migriere_nutzer_in_ausleihe(root)
         return root
     return ET.Element("verlauf")
 
@@ -537,6 +555,7 @@ def aktualisiere_verlauf(alle_medien):
                 # Erneute Ausleihe desselben Mediums
                 ausleihen = medium_elem.find("ausleihen")
                 ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+                ET.SubElement(ausleihe, "nutzer").text  = medium["name"]
                 ET.SubElement(ausleihe, "seit").text    = heute
                 ET.SubElement(ausleihe, "zurueck").text = ""
                 ET.SubElement(ausleihe, "frist").text   = frist_str
@@ -563,6 +582,7 @@ def aktualisiere_verlauf(alle_medien):
             ET.SubElement(elem, "cover_lokal").text  = cover_lokal
             ausleihen = ET.SubElement(elem, "ausleihen")
             ausleihe  = ET.SubElement(ausleihen, "ausleihe")
+            ET.SubElement(ausleihe, "nutzer").text  = medium["name"]
             ET.SubElement(ausleihe, "seit").text    = heute
             ET.SubElement(ausleihe, "zurueck").text = ""
             ET.SubElement(ausleihe, "frist").text   = frist_str
@@ -632,7 +652,7 @@ def generiere_html(root, lokal=False):
             "bis":          _xml_text(referenz, "zurueck"),
             "frist":        _xml_text(referenz, "frist"),
             "ausleihen":    [
-                {"seit": _xml_text(a, "seit"), "zurueck": _xml_text(a, "zurueck"), "frist": _xml_text(a, "frist")}
+                {"nutzer": _xml_text(a, "nutzer"), "seit": _xml_text(a, "seit"), "zurueck": _xml_text(a, "zurueck"), "frist": _xml_text(a, "frist")}
                 for a in alle_ausleihen
             ],
         })
@@ -978,6 +998,7 @@ def generiere_html(root, lokal=False):
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
       <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applySearch(this.value)">
       <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+      <a href="statistik.html" style="font-size:0.82rem;color:#6b7280;text-decoration:none;margin-left:4px">📊 Statistik</a>
     </div>
   </header>
   {sektionen_html}
@@ -1022,7 +1043,220 @@ def generiere_html(root, lokal=False):
 
 
 # ─────────────────────────────────────────────
-# SCHRITT 4: Hauptprogramm
+# SCHRITT 4: Statistik-Seite
+# ─────────────────────────────────────────────
+
+def generiere_statistik_html(root):
+    """Generiert statistik.html mit Ausleihdaten aus verlauf.xml."""
+    from collections import defaultdict
+
+    heute = datetime.date.today()
+    generiert = heute.strftime("%d.%m.%Y")
+
+    # Alle Ausleihen sammeln
+    alle = []
+    for elem in root.findall("medium"):
+        titel        = _xml_text(elem, "titel")
+        mediengruppe = _xml_text(elem, "mediengruppe")
+        nutzer_medium = _xml_text(elem, "nutzer")
+        ausleihen_elem = elem.find("ausleihen")
+        if ausleihen_elem is None:
+            continue
+        for a in ausleihen_elem.findall("ausleihe"):
+            nutzer  = _xml_text(a, "nutzer") or nutzer_medium
+            seit    = _xml_text(a, "seit")
+            zurueck = _xml_text(a, "zurueck")
+            frist   = _xml_text(a, "frist")
+            alle.append({"nutzer": nutzer, "titel": titel, "mediengruppe": mediengruppe,
+                         "seit": seit, "zurueck": zurueck, "frist": frist})
+
+    gesamt = len(alle)
+    if gesamt == 0:
+        return
+
+    # Ausleihen pro Nutzer
+    pro_nutzer = defaultdict(int)
+    for a in alle:
+        pro_nutzer[a["nutzer"]] += 1
+
+    # Ausleihen pro Mediengruppe, aufgeschlüsselt nach Nutzer
+    pro_gruppe_nutzer = defaultdict(lambda: defaultdict(int))
+    for a in alle:
+        pro_gruppe_nutzer[a["mediengruppe"]][a["nutzer"]] += 1
+    pro_gruppe_nutzer = dict(sorted(pro_gruppe_nutzer.items(), key=lambda x: -sum(x[1].values())))
+
+    # Ausleihen pro Monat (alle Nutzer zusammen)
+    pro_monat = defaultdict(int)
+    for a in alle:
+        if a["seit"]:
+            pro_monat[a["seit"][:7]] += 1
+    pro_monat = dict(sorted(pro_monat.items()))
+
+    # Durchschnittliche Ausleihdauer pro Nutzer (nur abgeschlossene)
+    tage_pro_nutzer = defaultdict(list)
+    for a in alle:
+        if a["seit"] and a["zurueck"]:
+            try:
+                d = (datetime.date.fromisoformat(a["zurueck"]) - datetime.date.fromisoformat(a["seit"])).days
+                if d >= 0:
+                    tage_pro_nutzer[a["nutzer"]].append(d)
+            except ValueError:
+                pass
+
+    # Medien mehrfach ausgeliehen
+    ausleihen_pro_medium = defaultdict(list)
+    for a in alle:
+        ausleihen_pro_medium[a["titel"]].append(a)
+    mehrfach = {t: v for t, v in ausleihen_pro_medium.items() if len(v) > 1}
+    mehrfach = dict(sorted(mehrfach.items(), key=lambda x: -len(x[1])))
+
+    nutzer_farben = {"Laura": "#3b82f6", "Benny": "#22c55e"}
+    def farbe(n):
+        return nutzer_farben.get(n, "#a78bfa")
+
+    def balken_html(items, farbe_fn, max_val=None):
+        if not items:
+            return ""
+        mv = max_val or max(items.values())
+        rows = ""
+        for label, val in items.items():
+            pct = int(val / mv * 100) if mv else 0
+            rows += (
+                f'<div class="bar-row">'
+                f'<span class="bar-label">{label}</span>'
+                f'<div class="bar-track">'
+                f'<div class="bar-fill" style="width:{pct}%;background:{farbe_fn(label)}"></div>'
+                f'</div>'
+                f'<span class="bar-val">{val}</span>'
+                f'</div>'
+            )
+        return rows
+
+    # Nutzer-Balken
+    nutzer_balken = balken_html(dict(sorted(pro_nutzer.items(), key=lambda x: -x[1])), farbe)
+
+    # Gruppen-Balken, pro Nutzer aufgeschlüsselt
+    def gruppe_balken_html(pro_gruppe_nutzer):
+        if not pro_gruppe_nutzer:
+            return ""
+        mv = max(sum(nv.values()) for nv in pro_gruppe_nutzer.values())
+        alle_nutzer = sorted({n for nv in pro_gruppe_nutzer.values() for n in nv})
+        rows = ""
+        for gruppe, nv in pro_gruppe_nutzer.items():
+            sub = "".join(
+                f'<div class="bar-row" style="margin-bottom:4px">'
+                f'<span class="bar-label" style="min-width:60px;font-size:0.75rem;color:{farbe(n)}">{n}</span>'
+                f'<div class="bar-track">'
+                f'<div class="bar-fill" style="width:{int(nv.get(n,0)/mv*100)}%;background:{farbe(n)}"></div>'
+                f'</div>'
+                f'<span class="bar-val">{nv.get(n,0)}</span>'
+                f'</div>'
+                for n in alle_nutzer if nv.get(n, 0) > 0
+            )
+            rows += (
+                f'<div style="margin-bottom:14px">'
+                f'<div style="font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px">{gruppe}</div>'
+                f'{sub}'
+                f'</div>'
+            )
+        return rows
+    gruppe_balken = gruppe_balken_html(pro_gruppe_nutzer)
+
+    # Monats-Balken
+    monat_farbe = lambda _: "#f59e0b"
+    monat_balken = balken_html(pro_monat, monat_farbe)
+
+    # Durchschnittsdauer-Tabelle
+    dauer_rows = ""
+    for n, tage in sorted(tage_pro_nutzer.items()):
+        avg = round(sum(tage) / len(tage), 1)
+        dauer_rows += f'<tr><td style="color:{farbe(n)};font-weight:600">{n}</td><td>{avg} Tage</td><td style="color:#9ca3af">(aus {len(tage)} Ausleihen)</td></tr>'
+
+    # Mehrfach-Tabelle
+    mehrfach_rows = ""
+    for titel, eintraege in list(mehrfach.items())[:10]:
+        badges = "".join(
+            f'<span class="badge" style="background:{farbe(e["nutzer"])}20;color:{farbe(e["nutzer"])};border:1px solid {farbe(e["nutzer"])}40">'
+            f'{e["nutzer"]} {e["seit"][:7] if e["seit"] else ""}</span>'
+            for e in eintraege
+        )
+        mehrfach_rows += f'<tr><td class="mt-titel">{titel}</td><td>{len(eintraege)}×</td><td>{badges}</td></tr>'
+
+    html = f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bibliothek Statistik</title>
+  <style>
+    *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #111827; padding: 24px 16px; }}
+    header {{ text-align: center; margin-bottom: 28px; }}
+    header h1 {{ font-size: 1.6rem; font-weight: 700; }}
+    header .subtitle {{ font-size: 0.82rem; color: #6b7280; margin-top: 4px; }}
+    .nav {{ text-align: center; margin-bottom: 24px; }}
+    .nav a {{ font-size: 0.85rem; color: #3b82f6; text-decoration: none; }}
+    .nav a:hover {{ text-decoration: underline; }}
+    .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 960px; margin: 0 auto; }}
+    .card {{ background: #fff; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }}
+    .card h2 {{ font-size: 0.95rem; font-weight: 700; color: #374151; margin-bottom: 16px; }}
+    .kpi-grid {{ display: flex; gap: 16px; flex-wrap: wrap; max-width: 960px; margin: 0 auto 16px; }}
+    .kpi {{ background: #fff; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 120px; text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,.07); }}
+    .kpi .val {{ font-size: 2rem; font-weight: 800; }}
+    .kpi .lbl {{ font-size: 0.75rem; color: #6b7280; margin-top: 2px; }}
+    .bar-row {{ display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }}
+    .bar-label {{ font-size: 0.82rem; min-width: 110px; color: #374151; }}
+    .bar-track {{ flex: 1; background: #f3f4f6; border-radius: 999px; height: 10px; overflow: hidden; }}
+    .bar-fill {{ height: 100%; border-radius: 999px; transition: width .4s; }}
+    .bar-val {{ font-size: 0.8rem; color: #6b7280; min-width: 24px; text-align: right; }}
+    table {{ width: 100%; border-collapse: collapse; font-size: 0.83rem; }}
+    td {{ padding: 6px 4px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }}
+    .mt-titel {{ max-width: 180px; word-break: break-word; color: #111827; }}
+    .badge {{ display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 0.72rem; margin: 2px 2px 0 0; white-space: nowrap; }}
+    footer {{ text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 28px; }}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Bibliothek Statistik</h1>
+    <div class="subtitle">Stand {generiert} · {gesamt} Ausleihen gesamt</div>
+  </header>
+  <div class="nav"><a href="verlauf.html">← Zurück zum Verlauf</a></div>
+
+  <div class="kpi-grid">
+    {"".join(f'<div class="kpi"><div class="val" style="color:{farbe(n)}">{v}</div><div class="lbl">{n}</div></div>' for n, v in sorted(pro_nutzer.items(), key=lambda x: -x[1]))}
+    <div class="kpi"><div class="val" style="color:#6366f1">{len(pro_gruppe_nutzer)}</div><div class="lbl">Medientypen</div></div>
+    <div class="kpi"><div class="val" style="color:#f59e0b">{len(pro_monat)}</div><div class="lbl">Monate aktiv</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Ausleihen pro Nutzer</h2>
+      {nutzer_balken}
+    </div>
+    <div class="card">
+      <h2>Mediengruppen</h2>
+      {gruppe_balken}
+    </div>
+    <div class="card" style="grid-column: 1 / -1">
+      <h2>Ausleihen pro Monat</h2>
+      {monat_balken}
+    </div>
+    {'<div class="card"><h2>Ø Ausleihdauer</h2><table>' + dauer_rows + '</table></div>' if dauer_rows else ''}
+    {'<div class="card" style="grid-column: 1 / -1"><h2>Mehrfach ausgeliehen</h2><table>' + mehrfach_rows + '</table></div>' if mehrfach_rows else ''}
+  </div>
+
+  <footer>Generiert am {generiert}</footer>
+</body>
+</html>"""
+
+    with open(VERLAUF_STATISTIK, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"   📊 {VERLAUF_STATISTIK} generiert")
+
+
+# ─────────────────────────────────────────────
+# SCHRITT 5: Hauptprogramm
 # ─────────────────────────────────────────────
 
 def main():
@@ -1084,6 +1318,7 @@ def main():
     print("\n─── Verlauf aktualisieren ───")
     verlauf_root = aktualisiere_verlauf(alle_medien)
     generiere_html(verlauf_root)
+    generiere_statistik_html(verlauf_root)
     if not os.environ.get("GITHUB_ACTIONS"):
         generiere_html(verlauf_root, lokal=True)
 
