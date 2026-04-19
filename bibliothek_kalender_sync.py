@@ -381,11 +381,20 @@ def _migriere_wenn_noetig(root):
 
 
 def hole_cover_url(isbn):
-    """Sucht Cover bei Open Library (primär) oder Google Books (Fallback)."""
+    """Sucht Cover: DNB (1), Open Library (2), Google Books (3)."""
     if not isbn:
         return ""
 
-    # Primär: Open Library (höhere Auflösung)
+    # 1. DNB
+    dnb_url = f"https://portal.dnb.de/opac/mvb/cover?isbn={isbn}"
+    try:
+        resp = requests.head(dnb_url, timeout=8, allow_redirects=True)
+        if resp.status_code == 200 and "image" in resp.headers.get("Content-Type", ""):
+            return dnb_url
+    except Exception as exc:
+        print(f"      ⚠️  DNB fehlgeschlagen für ISBN {isbn}: {exc}")
+
+    # 2. Open Library
     ol_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
     try:
         resp = requests.head(ol_url, params={"default": "false"}, timeout=8, allow_redirects=True)
@@ -394,7 +403,7 @@ def hole_cover_url(isbn):
     except Exception as exc:
         print(f"      ⚠️  Open Library fehlgeschlagen für ISBN {isbn}: {exc}")
 
-    # Fallback: Google Books
+    # 3. Google Books
     try:
         resp = requests.get(
             "https://www.googleapis.com/books/v1/volumes",
@@ -468,24 +477,16 @@ def speichere_verlauf(root):
         f.write(pretty)
 
 
-def hole_dnb_cover_url(isbn):
-    """Gibt die DNB-Cover-URL für eine ISBN zurück."""
-    return f"https://portal.dnb.de/opac/mvb/cover?isbn={isbn}"
-
-
-def lade_cover_lokal(cover_url, medium_id, isbn=""):
-    """Lädt Cover von Thalia (per ISBN) in COVERS_DIR herunter (gecacht)."""
+def lade_cover_lokal(cover_url, medium_id):
+    """Lädt Cover von cover_url in COVERS_DIR herunter (gecacht)."""
+    if not cover_url:
+        return ""
     Path(COVERS_DIR).mkdir(exist_ok=True)
     local_path = Path(COVERS_DIR) / f"{medium_id}.jpg"
     if local_path.exists():
         return str(local_path).replace("\\", "/")
-    url = hole_dnb_cover_url(isbn) if isbn else cover_url
-    if not url:
-        url = cover_url
-    if not url:
-        return ""
     try:
-        resp = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(cover_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
         local_path.write_bytes(resp.content)
         return str(local_path).replace("\\", "/")
@@ -496,7 +497,7 @@ def lade_cover_lokal(cover_url, medium_id, isbn=""):
 
 def _hole_cover_fuer_medium(medium_id, titel, mediengruppe, isbn):
     """Wählt die passende Cover-Quelle je nach Mediengruppe."""
-    if "Buch" in mediengruppe and isbn:
+    if isbn:
         time.sleep(2)
         return hole_cover_url(isbn)
     if mediengruppe == "Hörspielzeug" and not titel.startswith("Edurino"):
@@ -545,6 +546,7 @@ def aktualisiere_verlauf(alle_medien):
             cover_url = _hole_cover_fuer_medium(mid, medium["titel"], medium.get("mediengruppe", ""), isbn)
             if cover_url:
                 print(f"      🖼  Cover gefunden: {medium['titel']}")
+            cover_lokal = lade_cover_lokal(cover_url, mid)
             elem = ET.SubElement(root, "medium")
             ET.SubElement(elem, "medium_id").text   = mid
             ET.SubElement(elem, "titel").text        = medium["titel"]
@@ -553,6 +555,7 @@ def aktualisiere_verlauf(alle_medien):
             ET.SubElement(elem, "nutzer").text       = medium["name"]
             ET.SubElement(elem, "isbn").text         = isbn
             ET.SubElement(elem, "cover_url").text    = cover_url
+            ET.SubElement(elem, "cover_lokal").text  = cover_lokal
             ausleihen = ET.SubElement(elem, "ausleihen")
             ausleihe  = ET.SubElement(ausleihen, "ausleihe")
             ET.SubElement(ausleihe, "seit").text    = heute
@@ -560,19 +563,32 @@ def aktualisiere_verlauf(alle_medien):
             ET.SubElement(ausleihe, "frist").text   = frist_str
             print(f"   📗 Verlauf: neu – {medium['titel']}")
 
-    # Cover nachladen für Einträge ohne Cover-URL
+    # Cover nachladen für Einträge ohne cover_url oder cover_lokal
     for elem in root.findall("medium"):
-        cover_node = elem.find("cover_url")
-        if cover_node is None or (cover_node.text or "").strip():
-            continue
         mid          = _xml_text(elem, "medium_id")
         titel        = _xml_text(elem, "titel")
         mediengruppe = _xml_text(elem, "mediengruppe")
         isbn         = _xml_text(elem, "isbn")
-        url = _hole_cover_fuer_medium(mid, titel, mediengruppe, isbn)
-        if url:
-            cover_node.text = url
-            print(f"      🖼  Cover nachgeladen: {titel}")
+
+        cover_node = elem.find("cover_url")
+        if cover_node is None:
+            cover_node = ET.SubElement(elem, "cover_url")
+
+        cover_lokal_node = elem.find("cover_lokal")
+        if cover_lokal_node is None:
+            cover_lokal_node = ET.SubElement(elem, "cover_lokal")
+
+        if not (cover_node.text or "").strip():
+            url = _hole_cover_fuer_medium(mid, titel, mediengruppe, isbn)
+            if url:
+                cover_node.text = url
+                print(f"      🖼  Cover nachgeladen: {titel}")
+
+        if not (cover_lokal_node.text or "").strip() and (cover_node.text or "").strip():
+            path = lade_cover_lokal(cover_node.text, mid)
+            if path:
+                cover_lokal_node.text = path
+                print(f"      🖼  Cover lokal gespeichert: {titel}")
 
     speichere_verlauf(root)
     return root
@@ -600,6 +616,7 @@ def generiere_html(root, lokal=False):
             "nutzer":       _xml_text(elem, "nutzer"),
             "isbn":         _xml_text(elem, "isbn"),
             "cover_url":    _xml_text(elem, "cover_url"),
+            "cover_lokal":  _xml_text(elem, "cover_lokal"),
             "seit":         _xml_text(referenz, "seit"),
             "bis":          _xml_text(referenz, "zurueck"),
             "frist":        _xml_text(referenz, "frist"),
@@ -642,7 +659,7 @@ def generiere_html(root, lokal=False):
         farbe = nutzer_farben.get(e["nutzer"], "#f3f4f6")
         t = tage(e["seit"], e["bis"])
 
-        cover_src = (lade_cover_lokal(e["cover_url"], e["medium_id"], e["isbn"]) if lokal else e["cover_url"])
+        cover_src = (e["cover_lokal"] or e["cover_url"]) if lokal else e["cover_url"]
         if cover_src:
             cover_img = (
                 f'<img src="{cover_src}" alt="" loading="lazy" '
