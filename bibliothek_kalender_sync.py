@@ -543,10 +543,15 @@ def aktualisiere_verlauf(alle_medien):
                 print(f"   📗 Verlauf: erneut ausgeliehen – {_xml_text(medium_elem, 'titel')}")
         else:
             isbn = medium.get("isbn", "")
-            cover_url = _hole_cover_fuer_medium(mid, medium["titel"], medium.get("mediengruppe", ""), isbn)
-            if cover_url:
-                print(f"      🖼  Cover gefunden: {medium['titel']}")
-            cover_lokal = lade_cover_lokal(cover_url, mid)
+            local_path = Path(COVERS_DIR) / f"{mid}.jpg"
+            if local_path.exists():
+                cover_url   = ""
+                cover_lokal = str(local_path).replace("\\", "/")
+            else:
+                cover_url = _hole_cover_fuer_medium(mid, medium["titel"], medium.get("mediengruppe", ""), isbn)
+                if cover_url:
+                    print(f"      🖼  Cover gefunden: {medium['titel']}")
+                cover_lokal = lade_cover_lokal(cover_url, mid)
             elem = ET.SubElement(root, "medium")
             ET.SubElement(elem, "medium_id").text   = mid
             ET.SubElement(elem, "titel").text        = medium["titel"]
@@ -577,6 +582,12 @@ def aktualisiere_verlauf(alle_medien):
         cover_lokal_node = elem.find("cover_lokal")
         if cover_lokal_node is None:
             cover_lokal_node = ET.SubElement(elem, "cover_lokal")
+
+        local_path = Path(COVERS_DIR) / f"{mid}.jpg"
+        if local_path.exists():
+            if not (cover_lokal_node.text or "").strip():
+                cover_lokal_node.text = str(local_path).replace("\\", "/")
+            continue
 
         if not (cover_node.text or "").strip():
             url = _hole_cover_fuer_medium(mid, titel, mediengruppe, isbn)
@@ -943,6 +954,20 @@ def generiere_html(root, lokal=False):
     }}
     #pw-btn:hover {{ background: #1d4ed8; }}
     #pw-error {{ color: #dc2626; font-size: 0.82rem; margin-top: 10px; display: none; }}
+    #suche {{
+      margin-top: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 8px 14px 8px 36px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239ca3af' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+      transition: border-color .15s;
+      display: block;
+    }}
+    #suche:focus {{ border-color: #2563eb; }}
   </style>
 </head>
 <body>
@@ -950,22 +975,37 @@ def generiere_html(root, lokal=False):
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
     <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
-    <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <input id="suche" type="search" placeholder="Titel oder Verfasser suchen…" oninput="applySearch(this.value)">
+      <button id="filter-btn" onclick="toggleFilter()">Nur aktuell ausgeliehene</button>
+    </div>
   </header>
   {sektionen_html}
   <footer>Stadtbibliothek Halle · generiert von bibliothek_kalender_sync.py</footer>
   {pw_script_html}
   <script>
-  function applyFilter(aktiv) {{
-    document.querySelectorAll('.karte-zurueck').forEach(k => k.style.display = aktiv ? 'none' : '');
-    document.querySelectorAll('details').forEach(d => {{
-      const hatAktive = d.querySelectorAll('.karte:not(.karte-zurueck)').length > 0;
-      d.style.display = (aktiv && !hatAktive) ? 'none' : '';
+  function applyVisibility() {{
+    const q = (document.getElementById('suche').value || '').toLowerCase().trim();
+    const nurAktiv = sessionStorage.getItem('bib_filter') === '1';
+    document.querySelectorAll('.karte').forEach(k => {{
+      const titel = (k.querySelector('.titel')?.textContent || '').toLowerCase();
+      const verf  = (k.querySelector('.verfasser')?.textContent || '').toLowerCase();
+      const matchSuche = !q || titel.includes(q) || verf.includes(q);
+      const matchFilter = !nurAktiv || !k.classList.contains('karte-zurueck');
+      k.style.display = (matchSuche && matchFilter) ? '' : 'none';
     }});
+    document.querySelectorAll('details').forEach(d => {{
+      const hatSichtbare = [...d.querySelectorAll('.karte')].some(k => k.style.display !== 'none');
+      d.style.display = hatSichtbare ? '' : 'none';
+    }});
+  }}
+  function applySearch(val) {{ applyVisibility(); }}
+  function applyFilter(aktiv) {{
+    sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
     const btn = document.getElementById('filter-btn');
     btn.classList.toggle('aktiv', aktiv);
     btn.textContent = aktiv ? 'Alle anzeigen' : 'Nur aktuell ausgeliehene';
-    sessionStorage.setItem('bib_filter', aktiv ? '1' : '0');
+    applyVisibility();
   }}
   function toggleFilter() {{
     applyFilter(sessionStorage.getItem('bib_filter') !== '1');
