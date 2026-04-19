@@ -91,7 +91,7 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
     })
 
     print(f"📡 Verbinde mit Bibliotheksportal ({name})...")
-    response = session.get(LOGIN_URL)
+    response = session.get(LOGIN_URL, timeout=20)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
@@ -113,7 +113,7 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
     }
 
     print(f"🔐 Melde an ({name})...")
-    response = session.post(LOGIN_URL, data=post_data)
+    response = session.post(LOGIN_URL, data=post_data, timeout=20)
     response.raise_for_status()
 
     if "abmelden" not in response.text.lower():
@@ -1032,6 +1032,7 @@ def main():
 
     # 1. Medien aller Benutzer abrufen
     alle_medien = []
+    abruf_fehlgeschlagen = False
     for benutzer in BENUTZER:
         print(f"─── Ausgeliehene Medien: {benutzer['name']} ───")
         try:
@@ -1041,6 +1042,12 @@ def main():
             alle_medien.extend(medien)
         except Exception as e:
             print(f"\n❌ Fehler beim Abruf für {benutzer['name']}:\n   {e}")
+            abruf_fehlgeschlagen = True
+
+    if abruf_fehlgeschlagen:
+        print("\n⚠️  Sync abgebrochen – Bibliotheksportal nicht vollständig erreichbar.")
+        print("   Kalender und Verlauf bleiben unverändert.")
+        return
 
     if not alle_medien:
         print("ℹ️  Aktuell keine Medien ausgeliehen.")
