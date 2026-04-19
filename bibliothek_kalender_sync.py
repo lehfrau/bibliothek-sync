@@ -688,7 +688,7 @@ def generiere_html(root, lokal=False):
                 zeile += f' – {fmt_datum(a["zurueck"])}'
                 zusatz = f' · {tage(a["seit"], a["zurueck"])} {"Tag" if tage(a["seit"], a["zurueck"]) == 1 else "Tage"}'
             elif a["frist"]:
-                zusatz = f' · bis {fmt_datum(a["frist"])}'
+                zusatz = f' bis {fmt_datum(a["frist"])}'
             else:
                 zusatz = ''
             css = "datum" if aktuell else "datum datum-alt"
