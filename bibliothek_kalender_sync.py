@@ -48,11 +48,14 @@ BENUTZER = [
 GOOGLE_CREDENTIALS_FILE = "credentials.json"
 GOOGLE_TOKEN_FILE       = "token.json"
 
-# ID des Ziel-Kalenders (oder "primary" für Hauptkalender)
-KALENDER_ID = "21b41bda46bed0a74602bc0234ff02aea277e70fec21548420e4526982a02f07@group.calendar.google.com"
+# ID des Ziel-Kalenders – aus Umgebungsvariable (GitHub Secret: KALENDER_ID)
+KALENDER_ID = os.environ.get("KALENDER_ID", "")
 
 # Wie viele Tage vor Ablauf soll der Erinnerungsalarm erscheinen?
 ERINNERUNG_TAGE_VORHER = 3
+
+# Medien mit Frist innerhalb dieser Tage werden automatisch verlängert
+VERLAENGERUNG_SCHWELLE_TAGE = 3
 
 # Verlauf-Dateien
 VERLAUF_XML        = "verlauf.xml"
@@ -78,6 +81,90 @@ NUTZER_FARBEN_STATISTIK  = {"Laura": "#3b82f6", "Benny": "#22c55e"}
 # ─────────────────────────────────────────────
 # SCHRITT 1: Bibliothekskonto scrapen
 # ─────────────────────────────────────────────
+
+def verlaengere_faellige_medien(session, soup, name):
+    """
+    Verlängert alle verlängerbaren Medien mit Frist ≤ heute + VERLAENGERUNG_SCHWELLE_TAGE.
+    Gibt das aktualisierte HTML zurück, oder None wenn nichts zu verlängern war.
+    """
+    heute = datetime.date.today()
+    grenz_datum = heute + datetime.timedelta(days=VERLAENGERUNG_SCHWELLE_TAGE)
+
+    tabelle = soup.find("table", {"id": lambda x: x and "grdViewLoans" in x})
+    if not tabelle:
+        return None
+
+    zu_verlaengern = []
+
+    for zeile in tabelle.find_all("tr")[1:]:
+        zellen = zeile.find_all("td")
+        if len(zellen) < 4:
+            continue
+
+        extendable_div = zeile.find("div", class_="extendable")
+        if not extendable_div:
+            continue
+        style = extendable_div.get("style", "")
+        if "none" in style:
+            continue
+
+        datum = None
+        for zelle in zellen:
+            datum_match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", zelle.get_text(strip=True))
+            if datum_match:
+                tag, monat, jahr = datum_match.groups()
+                kandidat = datetime.date(int(jahr), int(monat), int(tag))
+                if datum is None or kandidat > datum:
+                    datum = kandidat
+
+        if datum is None or datum > grenz_datum:
+            continue
+
+        checkbox = zeile.find("input", {"type": "checkbox", "class": lambda c: c and "loancheckbox" in c})
+        copy_id_chx = zeile.find("input", {"id": lambda x: x and "CopyIdChx" in x})
+
+        if not checkbox or not copy_id_chx:
+            continue
+
+        titel_link = zeile.find("a", href=lambda h: h and "Mediensuche" in h)
+        titel = titel_link.get_text(strip=True) if titel_link else "?"
+        zu_verlaengern.append({
+            "titel":             titel,
+            "frist":             datum,
+            "checkbox_name":     checkbox["name"],
+            "copy_id_chx_name":  copy_id_chx["name"],
+            "copy_id_chx_value": copy_id_chx.get("value", ""),
+        })
+
+    if not zu_verlaengern:
+        return None
+
+    print(f"\n   🔄 {len(zu_verlaengern)} Medium/Medien werden verlängert ({name}):")
+    for item in zu_verlaengern:
+        print(f"      • {item['titel']} (Frist: {item['frist'].strftime('%d.%m.%Y')})")
+
+    def get_hidden(field_name):
+        tag = soup.find("input", {"name": field_name})
+        return tag["value"] if tag else ""
+
+    post_data = {
+        "__EVENTTARGET":        "",
+        "__EVENTARGUMENT":      "",
+        "__VIEWSTATE":          get_hidden("__VIEWSTATE"),
+        "__VIEWSTATEGENERATOR": get_hidden("__VIEWSTATEGENERATOR"),
+        "__EVENTVALIDATION":    get_hidden("__EVENTVALIDATION"),
+        "__VIEWSTATEENCRYPTED": get_hidden("__VIEWSTATEENCRYPTED"),
+        "dnn$ctr376$MainView$tpnlLoans$ucLoansView$BtnExtendMediums": "Medien verlängern",
+    }
+    for item in zu_verlaengern:
+        post_data[item["checkbox_name"]]    = "on"
+        post_data[item["copy_id_chx_name"]] = item["copy_id_chx_value"]
+
+    response = session.post(LOGIN_URL, data=post_data, timeout=20)
+    response.raise_for_status()
+    print(f"   ✅ Verlängerung abgeschickt ({name}).")
+    return response.text
+
 
 def hole_ausgeliehene_medien(name, ausweis, passwort):
     """
@@ -127,7 +214,14 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
         )
     print(f"✅ Login erfolgreich ({name}).")
 
-    return parse_ausleih_seite(response.text, name)
+    login_soup = BeautifulSoup(response.text, "html.parser")
+    try:
+        aktualisiertes_html = verlaengere_faellige_medien(session, login_soup, name)
+        html = aktualisiertes_html if aktualisiertes_html else response.text
+    except Exception as e:
+        print(f"   ⚠️  Verlängerung fehlgeschlagen ({name}), Sync wird fortgesetzt: {e}")
+        html = response.text
+    return parse_ausleih_seite(html, name)
 
 
 def parse_ausleih_seite(html, name):

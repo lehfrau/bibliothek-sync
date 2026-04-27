@@ -40,6 +40,7 @@ jobs:
           BIBL_AUSWEIS_BENNY:  ${{ secrets.BIBL_AUSWEIS_BENNY }}
           BIBL_PASSWORT_BENNY: ${{ secrets.BIBL_PASSWORT_BENNY }}
           HTML_PASSWORT:       ${{ secrets.HTML_PASSWORT }}
+          KALENDER_ID:         ${{ secrets.KALENDER_ID }}
         run: python bibliothek_kalender_sync.py
 
       - name: Verlauf committen
