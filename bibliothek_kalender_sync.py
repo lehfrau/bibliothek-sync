@@ -17,6 +17,7 @@ import re
 import time
 import datetime
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 from xml.dom import minidom
 from pathlib import Path
 import requests
@@ -73,6 +74,15 @@ SEITEN_PASSWORT = os.environ.get("HTML_PASSWORT", "")
 
 LOGIN_URL = "https://katalog.halle.de/Mein-Konto"
 SCOPES    = ["https://www.googleapis.com/auth/calendar"]
+
+
+def _get_hidden(soup, field_name):
+    tag = soup.find("input", {"name": field_name})
+    return tag["value"] if tag else ""
+
+
+def _ist_edurino(titel):
+    return titel.startswith("Edurino")
 
 NUTZER_FARBEN_VERLAUF    = {"Laura": "#dbeafe", "Benny": "#dcfce7"}
 NUTZER_FARBEN_STATISTIK  = {"Laura": "#3b82f6", "Benny": "#22c55e"}
@@ -143,17 +153,13 @@ def verlaengere_faellige_medien(session, soup, name):
     for item in zu_verlaengern:
         print(f"      • {item['titel']} (Frist: {item['frist'].strftime('%d.%m.%Y')})")
 
-    def get_hidden(field_name):
-        tag = soup.find("input", {"name": field_name})
-        return tag["value"] if tag else ""
-
     post_data = {
         "__EVENTTARGET":        "",
         "__EVENTARGUMENT":      "",
-        "__VIEWSTATE":          get_hidden("__VIEWSTATE"),
-        "__VIEWSTATEGENERATOR": get_hidden("__VIEWSTATEGENERATOR"),
-        "__EVENTVALIDATION":    get_hidden("__EVENTVALIDATION"),
-        "__VIEWSTATEENCRYPTED": get_hidden("__VIEWSTATEENCRYPTED"),
+        "__VIEWSTATE":          _get_hidden(soup, "__VIEWSTATE"),
+        "__VIEWSTATEGENERATOR": _get_hidden(soup, "__VIEWSTATEGENERATOR"),
+        "__EVENTVALIDATION":    _get_hidden(soup, "__EVENTVALIDATION"),
+        "__VIEWSTATEENCRYPTED": _get_hidden(soup, "__VIEWSTATEENCRYPTED"),
         "dnn$ctr376$MainView$tpnlLoans$ucLoansView$BtnExtendMediums": "Medien verlängern",
     }
     for item in zu_verlaengern:
@@ -187,17 +193,13 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    def get_hidden(field_name):
-        tag = soup.find("input", {"name": field_name})
-        return tag["value"] if tag else ""
-
     post_data = {
         "__EVENTTARGET":        "",
         "__EVENTARGUMENT":      "",
-        "__VIEWSTATE":          get_hidden("__VIEWSTATE"),
-        "__VIEWSTATEGENERATOR": get_hidden("__VIEWSTATEGENERATOR"),
-        "__EVENTVALIDATION":    get_hidden("__EVENTVALIDATION"),
-        "__VIEWSTATEENCRYPTED": get_hidden("__VIEWSTATEENCRYPTED"),
+        "__VIEWSTATE":          _get_hidden(soup, "__VIEWSTATE"),
+        "__VIEWSTATEGENERATOR": _get_hidden(soup, "__VIEWSTATEGENERATOR"),
+        "__EVENTVALIDATION":    _get_hidden(soup, "__EVENTVALIDATION"),
+        "__VIEWSTATEENCRYPTED": _get_hidden(soup, "__VIEWSTATEENCRYPTED"),
         "dnn$ctr375$Login$Login_COP$txtUsername": ausweis,
         "dnn$ctr375$Login$Login_COP$txtPassword": passwort,
         "dnn$ctr375$Login$Login_COP$cmdLogin":    "Anmelden",
@@ -370,7 +372,7 @@ def hole_bestehende_biblio_events(service):
 def _medien_prefix(m):
     mg = m.get("mediengruppe", "")
     if mg == "Hörspielzeug":
-        return "" if m["titel"].startswith("Edurino") else "Tonie: "
+        return "" if _ist_edurino(m.get("titel", "")) else "Tonie: "
     if mg == "Kinder-CD":
         return "CD: "
     return ""
@@ -422,7 +424,8 @@ def sync_events(service, medien_nach_datum, bestehende_events):
             altes_event = bestehende_events[datum_str]
             alte_ids = altes_event.get("extendedProperties", {}).get("private", {}).get("medium_ids", "")
 
-            if alte_ids == neue_ids:
+            alte_beschreibung = altes_event.get("description", "")
+            if alte_ids == neue_ids and alte_beschreibung == neues_body["description"]:
                 print(f"   ⏭️  Unverändert: {datum_str} ({len(medien_gruppe)} Medium/Medien)")
             else:
                 service.events().update(
@@ -624,7 +627,7 @@ def _hole_cover_fuer_medium(medium_id, titel, mediengruppe, isbn):
     if isbn:
         time.sleep(2)
         return hole_cover_url(isbn)
-    if mediengruppe == "Hörspielzeug" and not titel.startswith("Edurino"):
+    if mediengruppe == "Hörspielzeug" and not _ist_edurino(titel):
         return hole_tonie_cover(titel)
     return ""
 
@@ -781,7 +784,7 @@ def generiere_html(root, lokal=False):
 
     def display_gruppe(e):
         if e["mediengruppe"] == "Hörspielzeug":
-            return "Edurinos" if e["titel"].startswith("Edurino") else "Tonies"
+            return "Edurinos" if _ist_edurino(e["titel"]) else "Tonies"
         return e["mediengruppe"] or "Sonstiges"
 
     # Nach Mediengruppe gruppieren
@@ -1179,8 +1182,6 @@ def generiere_html(root, lokal=False):
 
 def generiere_statistik_html(root):
     """Generiert statistik.html mit Ausleihdaten aus verlauf.xml."""
-    from collections import defaultdict
-
     heute = datetime.date.today()
     generiert = heute.strftime("%d.%m.%Y")
 
