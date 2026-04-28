@@ -52,7 +52,7 @@ GOOGLE_TOKEN_FILE       = "token.json"
 KALENDER_ID = os.environ.get("KALENDER_ID", "")
 
 # Wie viele Tage vor Ablauf soll der Erinnerungsalarm erscheinen?
-ERINNERUNG_TAGE_VORHER = 3
+ERINNERUNG_TAGE_VORHER = 2
 
 # Medien mit Frist innerhalb dieser Tage werden automatisch verlängert
 VERLAENGERUNG_SCHWELLE_TAGE = 3
@@ -367,13 +367,22 @@ def hole_bestehende_biblio_events(service):
     return events_by_datum, alte_events
 
 
+def _medien_prefix(m):
+    mg = m.get("mediengruppe", "")
+    if mg == "Hörspielzeug":
+        return "" if m["titel"].startswith("Edurino") else "Tonie: "
+    if mg == "Kinder-CD":
+        return "CD: "
+    return ""
+
+
 def baue_event_body(datum_str, medien_gruppe):
     """Erstellt den Event-Body für eine Gruppe von Medien am gleichen Tag."""
     anzahl = len(medien_gruppe)
     summary = "📚 1 Medium abgeben" if anzahl == 1 else f"📚 {anzahl} Medien abgeben"
 
     beschreibung = "\n".join(
-        f"- {m['titel']} ({m['name']})"
+        f"- {_medien_prefix(m)}{m['titel']} ({m['name']})"
         for m in sorted(medien_gruppe, key=lambda m: (m["name"], m["titel"]))
     )
 
@@ -1382,7 +1391,7 @@ def generiere_statistik_html(root):
 
 def main():
     print("\n" + "═" * 55)
-    print("  📚 Bibliothek Halle → Google Calendar Sync")
+    print("  📚 Bibliothek Halle → Google Calendar Sync & Verlauf")
     print("═" * 55 + "\n")
 
     # 1. Medien aller Benutzer abrufen
@@ -1413,7 +1422,8 @@ def main():
         medien_nach_datum.setdefault(medium["frist"].isoformat(), []).append(medium)
 
     # 3. Google Calendar verbinden
-    print("\n─── Google Calendar ───")
+    print("\n" + "═" * 55)
+    print("─── Google Calendar ───")
     try:
         service = google_calendar_service()
     except Exception as e:
@@ -1436,7 +1446,8 @@ def main():
     sync_events(service, medien_nach_datum, bestehende_events)
 
     # 6. Verlauf aktualisieren und HTML generieren
-    print("\n─── Verlauf aktualisieren ───")
+    print("\n" + "═" * 55)
+    print("─── Verlauf aktualisieren ───")
     verlauf_root = aktualisiere_verlauf(alle_medien)
     generiere_html(verlauf_root)
     generiere_statistik_html(verlauf_root)
