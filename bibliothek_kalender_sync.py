@@ -104,6 +104,7 @@ def verlaengere_faellige_medien(session, soup, name):
     if not tabelle:
         return None
 
+    # Schritt 1: Fällige, verlängerbare Medien und ihre Checkbox-Namen ermitteln
     zu_verlaengern = []
 
     for zeile in tabelle.find_all("tr")[1:]:
@@ -111,40 +112,32 @@ def verlaengere_faellige_medien(session, soup, name):
         if len(zellen) < 4:
             continue
 
-        extendable_div = zeile.find("div", class_="extendable")
-        if not extendable_div:
-            continue
-        style = extendable_div.get("style", "")
-        if "none" in style:
-            continue
-
+        # Aktuelles Fristdatum aus dem "Aktuelle Frist"-Label lesen
         datum = None
         for zelle in zellen:
-            datum_match = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", zelle.get_text(strip=True))
-            if datum_match:
-                tag, monat, jahr = datum_match.groups()
-                kandidat = datetime.date(int(jahr), int(monat), int(tag))
-                if datum is None or kandidat > datum:
-                    datum = kandidat
+            label = zelle.find("span", string=re.compile(r"Aktuelle Frist"))
+            if label is None:
+                label = zelle.find("span", class_=lambda c: c and "oclc-module-label" in c)
+                if label and "Aktuelle Frist" not in label.get_text():
+                    label = None
+            if label:
+                frist_text = zelle.get_text(strip=True)
+                m = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", frist_text)
+                if m:
+                    datum = datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+                break
 
         if datum is None or datum > grenz_datum:
             continue
 
-        checkbox = zeile.find("input", {"type": "checkbox", "class": lambda c: c and "loancheckbox" in c})
-        copy_id_chx = zeile.find("input", {"id": lambda x: x and "CopyIdChx" in x})
-
-        if not checkbox or not copy_id_chx:
+        checkbox_span = zeile.find("span", class_=lambda c: c and "loancheckbox" in c)
+        checkbox = checkbox_span.find("input", {"type": "checkbox"}) if checkbox_span else None
+        if not checkbox:
             continue
 
         titel_link = zeile.find("a", href=lambda h: h and "Mediensuche" in h)
         titel = titel_link.get_text(strip=True) if titel_link else "?"
-        zu_verlaengern.append({
-            "titel":             titel,
-            "frist":             datum,
-            "checkbox_name":     checkbox["name"],
-            "copy_id_chx_name":  copy_id_chx["name"],
-            "copy_id_chx_value": copy_id_chx.get("value", ""),
-        })
+        zu_verlaengern.append({"titel": titel, "frist": datum, "checkbox_name": checkbox["name"]})
 
     if not zu_verlaengern:
         return None
@@ -153,18 +146,19 @@ def verlaengere_faellige_medien(session, soup, name):
     for item in zu_verlaengern:
         print(f"      • {item['titel']} (Frist: {item['frist'].strftime('%d.%m.%Y')})")
 
-    post_data = {
-        "__EVENTTARGET":        "",
-        "__EVENTARGUMENT":      "",
-        "__VIEWSTATE":          _get_hidden(soup, "__VIEWSTATE"),
-        "__VIEWSTATEGENERATOR": _get_hidden(soup, "__VIEWSTATEGENERATOR"),
-        "__EVENTVALIDATION":    _get_hidden(soup, "__EVENTVALIDATION"),
-        "__VIEWSTATEENCRYPTED": _get_hidden(soup, "__VIEWSTATEENCRYPTED"),
-        "dnn$ctr376$MainView$tpnlLoans$ucLoansView$BtnExtendMediums": "Medien verlängern",
-    }
+    # Schritt 2: Alle hidden-Felder der Seite einsammeln (wie ein Browser)
+    post_data = {}
+    for inp in soup.find_all("input", type="hidden"):
+        n = inp.get("name")
+        if n:
+            post_data[n] = inp.get("value", "")
+
+    # Schritt 3: Checkboxen der zu verlängernden Medien aktivieren
     for item in zu_verlaengern:
-        post_data[item["checkbox_name"]]    = "on"
-        post_data[item["copy_id_chx_name"]] = item["copy_id_chx_value"]
+        post_data[item["checkbox_name"]] = "on"
+
+    # Schritt 4: Submit-Knopf "Medien verlängern" hinzufügen
+    post_data["dnn$ctr376$MainView$tpnlLoans$ucLoansView$BtnExtendMediums"] = "Medien verlängern"
 
     response = session.post(LOGIN_URL, data=post_data, timeout=20)
     response.raise_for_status()
@@ -192,7 +186,7 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
-
+    
     post_data = {
         "__EVENTTARGET":        "",
         "__EVENTARGUMENT":      "",
@@ -217,6 +211,7 @@ def hole_ausgeliehene_medien(name, ausweis, passwort):
     print(f"✅ Login erfolgreich ({name}).")
 
     login_soup = BeautifulSoup(response.text, "html.parser")
+
     try:
         aktualisiertes_html = verlaengere_faellige_medien(session, login_soup, name)
         html = aktualisiertes_html if aktualisiertes_html else response.text
