@@ -12,7 +12,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-04-17</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-12</frist>
       </ausleihe>
     </ausleihen>
@@ -48,7 +48,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-04-17</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-12</frist>
       </ausleihe>
     </ausleihen>
@@ -282,7 +282,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-18</frist>
       </ausleihe>
     </ausleihen>
@@ -300,7 +300,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-19</frist>
       </ausleihe>
     </ausleihen>
@@ -318,7 +318,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-19</frist>
       </ausleihe>
     </ausleihen>
@@ -336,7 +336,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-19</frist>
       </ausleihe>
     </ausleihen>
@@ -372,7 +372,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-19</frist>
       </ausleihe>
     </ausleihen>
@@ -408,7 +408,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-09</zurueck>
         <frist>2026-05-19</frist>
       </ausleihe>
     </ausleihen>
@@ -431,5 +431,275 @@
       </ausleihe>
     </ausleihen>
     <cover_lokal>covers/0589459.jpg</cover_lokal>
+  </medium>
+  <medium>
+    <medium_id>0489455</medium_id>
+    <titel>Wir entdecken Märchen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783833739446</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783833739446</cover_url>
+    <cover_lokal>covers/0489455.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-05-26</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0547211</medium_id>
+    <titel>Rund um die Welt mit Fuchs &amp; Schaf</titel>
+    <verfasser>Theodora, Stephie</verfasser>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/uyzo07x2mijl4ia24gj3txymaio2</cover_url>
+    <cover_lokal>covers/0547211.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-05-26</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0566191</medium_id>
+    <titel>Wie helfe ich der Umwelt?</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783833744488</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783833744488</cover_url>
+    <cover_lokal>covers/0566191.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-05-26</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0572075</medium_id>
+    <titel>Der kleine Wassermann</titel>
+    <verfasser>Preußler, Otfried</verfasser>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783745601886</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783745601886</cover_url>
+    <cover_lokal>covers/0572075.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-05-26</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0589862</medium_id>
+    <titel>Karmas Welt</titel>
+    <verfasser/>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/a1g1kdyclmmn32u7o9z4l6dos32x</cover_url>
+    <cover_lokal>covers/0589862.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-05-26</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0455692</medium_id>
+    <titel>Ein kleiner Hund zum Liebhaben</titel>
+    <verfasser>Niemelä, Reetta; Savolainen, Salla</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783833903731</isbn>
+    <cover_url/>
+    <cover_lokal/>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0470689</medium_id>
+    <titel>Nulli und Priesemut machen Urlaub</titel>
+    <verfasser>Sodtke, Matthias; Kollars, Helmut</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783830312628</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783830312628</cover_url>
+    <cover_lokal>covers/0470689.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0548499</medium_id>
+    <titel>Das Krakeltier</titel>
+    <verfasser>Postel, Mareike; Raab, Ann Cathrin</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783743204072</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783743204072</cover_url>
+    <cover_lokal>covers/0548499.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0549509</medium_id>
+    <titel>Die Einhorn-Enzyklopädie</titel>
+    <verfasser>Drews, Judith</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783964280855</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783964280855</cover_url>
+    <cover_lokal>covers/0549509.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0574126</medium_id>
+    <titel>Die Kartoffel</titel>
+    <verfasser>Fischer-Nagel, Heiderose; Fischer-Nagel, Andreas</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783930038930</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783930038930</cover_url>
+    <cover_lokal>covers/0574126.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0576657</medium_id>
+    <titel>Wo geht der Astronaut aufs Klo?</titel>
+    <verfasser>Schmitt, Petra Maria; Dreller, Christian</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783751400961</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783751400961</cover_url>
+    <cover_lokal>covers/0576657.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0609907</medium_id>
+    <titel>Abenteuer im Weltraum</titel>
+    <verfasser>Kratzenberg-Annies, Volker</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783788677619</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783788677619</cover_url>
+    <cover_lokal>covers/0609907.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0613671</medium_id>
+    <titel>Wir erkunden den Weltraum</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473492954</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473492954</cover_url>
+    <cover_lokal>covers/0613671.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0614027</medium_id>
+    <titel>Entdecke die Welt der Stöcke</titel>
+    <verfasser>Storrusten, Kristin</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783734860492</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783734860492</cover_url>
+    <cover_lokal>covers/0614027.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0615748</medium_id>
+    <titel>Weltatlas</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473492879</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473492879</cover_url>
+    <cover_lokal>covers/0615748.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-09</seit>
+        <zurueck/>
+        <frist>2026-06-09</frist>
+      </ausleihe>
+    </ausleihen>
   </medium>
 </verlauf>
