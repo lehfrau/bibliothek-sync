@@ -458,6 +458,13 @@ def _xml_text(element, tag):
     return (child.text or "") if child is not None else ""
 
 
+def _setze_xml_meta(root, tag, wert):
+    elem = root.find(tag)
+    if elem is None:
+        elem = ET.SubElement(root, tag)
+    elem.text = wert
+
+
 def _aktive_ausleihe(medium_elem):
     """Gibt die aktive <ausleihe> zurück (ohne <zurueck>-Datum), oder None."""
     ausleihen = medium_elem.find("ausleihen")
@@ -728,11 +735,12 @@ def aktualisiere_verlauf(alle_medien):
                 cover_lokal_node.text = path
                 print(f"      🖼  Cover lokal gespeichert: {titel}")
 
+    _setze_xml_meta(root, "letzte_aktualisierung", datetime.datetime.now().isoformat(timespec="minutes"))
     speichere_verlauf(root)
     return root
 
 
-def generiere_html(root, lokal=False):
+def generiere_html(root, lokal=False, kalender_ok=True):
     """Generiert verlauf.html (lokal=False) oder verlauf_lokal.html (lokal=True)."""
     heute = datetime.date.today()
 
@@ -805,7 +813,6 @@ def generiere_html(root, lokal=False):
         else:
             cover_img = '<div class="no-cover">📚</div>'
 
-        dot = '<span class="dot-aktiv"></span>' if ist_aktiv else ''
         verfasser_html = f'<div class="verfasser">{e["verfasser"]}</div>' if e["verfasser"] else ""
         def fmt_ausleihe_zeile(a, aktuell):
             zeile = fmt_datum(a["seit"])
@@ -825,10 +832,9 @@ def generiere_html(root, lokal=False):
         )
 
         return (
-            f'<div class="karte{"" if ist_aktiv else " karte-zurueck"}" data-nutzer="{e["nutzer"].lower()}">'
+            f'<div class="karte{" karte-aktiv" if ist_aktiv else " karte-zurueck"}" data-nutzer="{e["nutzer"].lower()}">'
             f'<a class="cover-wrap" href="https://katalog.halle.de/Mediensuche?id={e["medium_id"]}" target="_blank">'
             f'{cover_img}'
-            f'{dot}'
             f'<span class="nutzer-badge" style="background:{farbe}">{e["nutzer"]}</span>'
             f'</a>'
             f'<div class="info">'
@@ -907,6 +913,24 @@ def generiere_html(root, lokal=False):
         pw_overlay_html = ""
         pw_script_html  = ""
 
+    if not kalender_ok:
+        letzter_sync = _xml_text(root, "letzter_kalender_sync")
+        if letzter_sync:
+            try:
+                sync_fmt = datetime.datetime.fromisoformat(letzter_sync).strftime("%d.%m.%Y %H:%M")
+            except ValueError:
+                sync_fmt = letzter_sync
+            sync_info = f"Letzter erfolgreicher Kalender-Sync: {sync_fmt}"
+        else:
+            sync_info = "Kalender wurde noch nie erfolgreich synchronisiert."
+        kalender_banner_html = (
+            f'<div class="kalender-fehler-banner">'
+            f'⚠️ Google Kalender konnte nicht aktualisiert werden – {sync_info}'
+            f'</div>'
+        )
+    else:
+        kalender_banner_html = ""
+
     html = f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -970,6 +994,7 @@ def generiere_html(root, lokal=False):
       box-shadow: 0 1px 4px rgba(0,0,0,.1);
     }}
     .karte-zurueck {{ opacity: 0.6; box-shadow: none; }}
+    .karte-aktiv {{ background: #f0fdf4; box-shadow: 0 1px 4px rgba(0,0,0,.1); }}
     .cover-wrap {{
       position: relative;
       width: 100%;
@@ -993,16 +1018,6 @@ def generiere_html(root, lokal=False):
       justify-content: center;
       font-size: 2.5rem;
       background: #e5e7eb;
-    }}
-    .dot-aktiv {{
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 13px;
-      height: 13px;
-      background: #4ade80;
-      border-radius: 50%;
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
     }}
     .nutzer-badge {{
       position: absolute;
@@ -1108,10 +1123,21 @@ def generiere_html(root, lokal=False):
       transition: border-color .15s;
     }}
     #suche:focus {{ border-color: #2563eb; }}
+    .kalender-fehler-banner {{
+      background: #fef3c7;
+      border: 1.5px solid #f59e0b;
+      color: #92400e;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }}
   </style>
 </head>
 <body>
   {pw_overlay_html}
+  {kalender_banner_html}
   <header>
     <h1>📚 Bibliothek Verlauf</h1>
     <div class="subtitle">{anz_gesamt} Medien insgesamt · {anz_aktiv} aktuell ausgeliehen · Stand {generiert}</div>
@@ -1421,37 +1447,43 @@ def main():
         medien_nach_datum.setdefault(medium["frist"].isoformat(), []).append(medium)
 
     # 3. Google Calendar verbinden
+    kalender_ok = False
     print("\n" + "═" * 55)
     print("─── Google Calendar ───")
     try:
         service = google_calendar_service()
+        kalender_ok = True
     except Exception as e:
         print(f"\n❌ Fehler bei Google-Authentifizierung:\n   {e}")
-        return
+        print("   Verlauf wird trotzdem aktualisiert.")
 
-    # 4. Bestehende Events laden
-    bestehende_events, alte_events = hole_bestehende_biblio_events(service)
-    print(f"   Gefunden: {len(bestehende_events)} bestehende Einträge im Kalender.")
-    if alte_events:
-        print(f"   Migration: {len(alte_events)} Einträge im alten Format werden gelöscht.")
+    if kalender_ok:
+        # 4. Bestehende Events laden
+        bestehende_events, alte_events = hole_bestehende_biblio_events(service)
+        print(f"   Gefunden: {len(bestehende_events)} bestehende Einträge im Kalender.")
+        if alte_events:
+            print(f"   Migration: {len(alte_events)} Einträge im alten Format werden gelöscht.")
 
-    # 4a. Alte Events (ein Event pro Medium) löschen
-    for event in alte_events:
-        service.events().delete(calendarId=KALENDER_ID, eventId=event["id"]).execute()
-        print(f"   🗑️  Migration: altes Event gelöscht: {event.get('summary', event['id'])}")
+        # 4a. Alte Events (ein Event pro Medium) löschen
+        for event in alte_events:
+            service.events().delete(calendarId=KALENDER_ID, eventId=event["id"]).execute()
+            print(f"   🗑️  Migration: altes Event gelöscht: {event.get('summary', event['id'])}")
 
-    # 5. Events synchronisieren
-    print("\n─── Kalender aktualisieren ───")
-    sync_events(service, medien_nach_datum, bestehende_events)
+        # 5. Events synchronisieren
+        print("\n─── Kalender aktualisieren ───")
+        sync_events(service, medien_nach_datum, bestehende_events)
 
     # 6. Verlauf aktualisieren und HTML generieren
     print("\n" + "═" * 55)
     print("─── Verlauf aktualisieren ───")
     verlauf_root = aktualisiere_verlauf(alle_medien)
-    generiere_html(verlauf_root)
+    if kalender_ok:
+        _setze_xml_meta(verlauf_root, "letzter_kalender_sync", datetime.datetime.now().isoformat(timespec="minutes"))
+        speichere_verlauf(verlauf_root)
+    generiere_html(verlauf_root, kalender_ok=kalender_ok)
     generiere_statistik_html(verlauf_root)
     if not os.environ.get("GITHUB_ACTIONS"):
-        generiere_html(verlauf_root, lokal=True)
+        generiere_html(verlauf_root, lokal=True, kalender_ok=kalender_ok)
 
     print("\n" + "═" * 55)
     print("  ✅ Sync abgeschlossen!")
