@@ -265,7 +265,7 @@
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
         <zurueck/>
-        <frist>2026-05-18</frist>
+        <frist>2026-05-30</frist>
       </ausleihe>
     </ausleihen>
     <cover_lokal/>
@@ -702,6 +702,6 @@
       </ausleihe>
     </ausleihen>
   </medium>
-  <letzte_aktualisierung>2026-05-14T06:23</letzte_aktualisierung>
-  <letzter_kalender_sync>2026-05-14T06:23</letzter_kalender_sync>
+  <letzte_aktualisierung>2026-05-15T06:32</letzte_aktualisierung>
+  <letzter_kalender_sync>2026-05-15T06:32</letzter_kalender_sync>
 </verlauf>
