@@ -509,20 +509,11 @@ def _migriere_nutzer_in_ausleihe(root):
 
 
 def hole_cover_url(isbn):
-    """Sucht Cover: DNB (1), Open Library (2), Google Books (3)."""
+    """Sucht Cover: Open Library (1), Google Books (2), DNB (3, Fallback)."""
     if not isbn:
         return ""
 
-    # 1. DNB
-    dnb_url = f"https://portal.dnb.de/opac/mvb/cover?isbn={isbn}"
-    try:
-        resp = requests.head(dnb_url, timeout=8, allow_redirects=True)
-        if resp.status_code == 200 and "image" in resp.headers.get("Content-Type", ""):
-            return dnb_url
-    except Exception as exc:
-        print(f"      ⚠️  DNB fehlgeschlagen für ISBN {isbn}: {exc}")
-
-    # 2. Open Library
+    # 1. Open Library (kein Hotlinking-Schutz, zuverlässig im Browser)
     ol_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
     try:
         resp = requests.head(ol_url, params={"default": "false"}, timeout=8, allow_redirects=True)
@@ -531,7 +522,7 @@ def hole_cover_url(isbn):
     except Exception as exc:
         print(f"      ⚠️  Open Library fehlgeschlagen für ISBN {isbn}: {exc}")
 
-    # 3. Google Books
+    # 2. Google Books
     try:
         resp = requests.get(
             "https://www.googleapis.com/books/v1/volumes",
@@ -547,6 +538,15 @@ def hole_cover_url(isbn):
                 return url.replace("http://", "https://")
     except Exception as exc:
         print(f"      ⚠️  Google Books fehlgeschlagen für ISBN {isbn}: {exc}")
+
+    # 3. DNB (Fallback – kann im Browser durch Hotlinking-Schutz blockiert sein)
+    dnb_url = f"https://portal.dnb.de/opac/mvb/cover?isbn={isbn}"
+    try:
+        resp = requests.head(dnb_url, timeout=8, allow_redirects=True)
+        if resp.status_code == 200 and "image" in resp.headers.get("Content-Type", ""):
+            return dnb_url
+    except Exception as exc:
+        print(f"      ⚠️  DNB fehlgeschlagen für ISBN {isbn}: {exc}")
 
     print(f"      ⚠️  Kein Cover gefunden für ISBN {isbn}")
     return ""
@@ -586,6 +586,15 @@ def _strip_whitespace(elem):
             e.tail = None
 
 
+def _migriere_dnb_cover_urls(root):
+    """Leert gespeicherte DNB-cover_url-Werte, damit sie beim nächsten Lauf neu abgerufen werden.
+    DNB blockiert Hotlinking im Browser; Open Library / Google Books sind zuverlässiger."""
+    for elem in root.findall("medium"):
+        cover_node = elem.find("cover_url")
+        if cover_node is not None and (cover_node.text or "").startswith("https://portal.dnb.de"):
+            cover_node.text = ""
+
+
 def lade_verlauf():
     """Lädt verlauf.xml oder gibt leeres Root-Element zurück."""
     if Path(VERLAUF_XML).exists():
@@ -593,6 +602,7 @@ def lade_verlauf():
         _strip_whitespace(root)
         _migriere_wenn_noetig(root)
         _migriere_nutzer_in_ausleihe(root)
+        _migriere_dnb_cover_urls(root)
         return root
     return ET.Element("verlauf")
 
@@ -718,7 +728,8 @@ def aktualisiere_verlauf(alle_medien):
         if local_path.exists():
             if not (cover_lokal_node.text or "").strip():
                 cover_lokal_node.text = str(local_path).replace("\\", "/")
-            continue
+            if (cover_node.text or "").strip():
+                continue  # cover_url und lokale Datei vorhanden – nichts zu tun
 
         if not (cover_node.text or "").strip():
             url = _hole_cover_fuer_medium(mid, titel, mediengruppe, isbn)
