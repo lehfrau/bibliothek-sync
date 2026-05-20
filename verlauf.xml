@@ -187,7 +187,7 @@
     <mediengruppe>Kinder-Buch</mediengruppe>
     <nutzer>Benny</nutzer>
     <isbn>9783407793638</isbn>
-    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=978-3-407-79499-4</cover_url>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783407793638</cover_url>
     <ausleihen>
       <ausleihe>
         <nutzer>Benny</nutzer>
@@ -475,7 +475,7 @@
     <mediengruppe>Kinder-CD</mediengruppe>
     <nutzer>Benny</nutzer>
     <isbn>9783833744488</isbn>
-    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783833744488</cover_url>
+    <cover_url>https://covers.openlibrary.org/b/isbn/9783833744488-L.jpg</cover_url>
     <cover_lokal>covers/0566191.jpg</cover_lokal>
     <ausleihen>
       <ausleihe>
@@ -547,7 +547,7 @@
     <mediengruppe>Kinder-Buch</mediengruppe>
     <nutzer>Benny</nutzer>
     <isbn>9783830312628</isbn>
-    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783830312628</cover_url>
+    <cover_url>https://covers.openlibrary.org/b/isbn/9783830312628-L.jpg</cover_url>
     <cover_lokal>covers/0470689.jpg</cover_lokal>
     <ausleihen>
       <ausleihe>
@@ -702,6 +702,6 @@
       </ausleihe>
     </ausleihen>
   </medium>
-  <letzte_aktualisierung>2026-05-20T12:15</letzte_aktualisierung>
-  <letzter_kalender_sync>2026-05-20T12:15</letzter_kalender_sync>
+  <letzte_aktualisierung>2026-05-20T21:56</letzte_aktualisierung>
+  <letzter_kalender_sync>2026-05-20T21:56</letzter_kalender_sync>
 </verlauf>
