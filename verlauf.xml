@@ -264,7 +264,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-05-30</frist>
       </ausleihe>
     </ausleihen>
@@ -426,7 +426,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-06-15</frist>
       </ausleihe>
     </ausleihen>
@@ -445,7 +445,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-05-26</frist>
       </ausleihe>
     </ausleihen>
@@ -481,7 +481,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-05-26</frist>
       </ausleihe>
     </ausleihen>
@@ -499,7 +499,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-05-26</frist>
       </ausleihe>
     </ausleihen>
@@ -571,7 +571,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -637,7 +637,7 @@
     <mediengruppe>Kinder-Buch</mediengruppe>
     <nutzer>Benny</nutzer>
     <isbn>9783788677619</isbn>
-    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783788677619</cover_url>
+    <cover_url/>
     <cover_lokal>covers/0609907.jpg</cover_lokal>
     <ausleihen>
       <ausleihe>
@@ -679,7 +679,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -697,11 +697,263 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-05-22</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
   </medium>
-  <letzte_aktualisierung>2026-05-21T21:29</letzte_aktualisierung>
-  <letzter_kalender_sync>2026-05-21T21:29</letzter_kalender_sync>
+  <letzte_aktualisierung>2026-05-22T21:13</letzte_aktualisierung>
+  <letzter_kalender_sync>2026-05-22T21:13</letzter_kalender_sync>
+  <medium>
+    <medium_id>0432463</medium_id>
+    <titel>Die Uhr und die Zeit</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783833734564</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783833734564</cover_url>
+    <cover_lokal>covers/0432463.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0466171</medium_id>
+    <titel>Frag doch mal ...</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783837136210</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783837136210</cover_url>
+    <cover_lokal>covers/0466171.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0474837</medium_id>
+    <titel>Die schönsten Märchen der Brüder Grimm</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783401240831</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783401240831</cover_url>
+    <cover_lokal>covers/0474837.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0507519</medium_id>
+    <titel>Good Night Stories for Rebel Girls - Mehr außergewöhnliche Frauen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783742410436</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783742410436</cover_url>
+    <cover_lokal>covers/0507519.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0525785</medium_id>
+    <titel>Was ist was - Raumfahrt [und 1 weiterer]</titel>
+    <verfasser/>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url/>
+    <cover_lokal/>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0600024</medium_id>
+    <titel>Planeten und Raumfahrt</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-CD</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783788670160</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783788670160</cover_url>
+    <cover_lokal>covers/0600024.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-06</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0502978</medium_id>
+    <titel>Conni kann nicht einschlafen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783551518286</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783551518286</cover_url>
+    <cover_lokal>covers/0502978.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0505480</medium_id>
+    <titel>Meine schönsten Lieder für unterwegs</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473554799</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473554799</cover_url>
+    <cover_lokal>covers/0505480.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0581737</medium_id>
+    <titel>Astronautenkinder</titel>
+    <verfasser>Berger, Natascha; Taube, Anna</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783845848778</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783845848778</cover_url>
+    <cover_lokal>covers/0581737.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0587688</medium_id>
+    <titel>Lotta entdeckt die Welt im Frühling</titel>
+    <verfasser>Grimm, Sandra; Senner, Katja</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473418251</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473418251</cover_url>
+    <cover_lokal>covers/0587688.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0591212</medium_id>
+    <titel>Emma im Weltall</titel>
+    <verfasser>Dupin, Olivier; Mabire, Gregoire</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783038762591</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783038762591</cover_url>
+    <cover_lokal>covers/0591212.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0594857</medium_id>
+    <titel>Beethupferl</titel>
+    <verfasser/>
+    <mediengruppe>Spiel</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url/>
+    <cover_lokal/>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0600470</medium_id>
+    <titel>Der Weltraum</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473492824</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473492824</cover_url>
+    <cover_lokal>covers/0600470.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0618437</medium_id>
+    <titel>BLUEY – Zeichnen lernen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783570182239</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783570182239</cover_url>
+    <cover_lokal>covers/0618437.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-05-22</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
 </verlauf>
