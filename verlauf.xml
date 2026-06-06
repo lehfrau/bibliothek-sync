@@ -354,7 +354,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-15</frist>
       </ausleihe>
     </ausleihen>
@@ -390,7 +390,7 @@
       <ausleihe>
         <nutzer>Laura</nutzer>
         <seit>2026-04-18</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-15</frist>
       </ausleihe>
     </ausleihen>
@@ -463,7 +463,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-19</frist>
       </ausleihe>
     </ausleihen>
@@ -517,7 +517,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-19</frist>
       </ausleihe>
     </ausleihen>
@@ -535,7 +535,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -553,7 +553,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -589,7 +589,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -607,7 +607,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -626,7 +626,7 @@
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
         <zurueck/>
-        <frist>2026-06-09</frist>
+        <frist>2026-07-04</frist>
       </ausleihe>
     </ausleihen>
   </medium>
@@ -643,7 +643,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -661,7 +661,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-09</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-09</frist>
       </ausleihe>
     </ausleihen>
@@ -702,8 +702,8 @@
       </ausleihe>
     </ausleihen>
   </medium>
-  <letzte_aktualisierung>2026-06-05T21:28</letzte_aktualisierung>
-  <letzter_kalender_sync>2026-06-05T21:28</letzter_kalender_sync>
+  <letzte_aktualisierung>2026-06-06T21:07</letzte_aktualisierung>
+  <letzter_kalender_sync>2026-06-06T21:07</letzter_kalender_sync>
   <medium>
     <medium_id>0432463</medium_id>
     <titel>Die Uhr und die Zeit</titel>
@@ -717,7 +717,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-18</frist>
       </ausleihe>
     </ausleihen>
@@ -735,7 +735,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-18</frist>
       </ausleihe>
     </ausleihen>
@@ -753,7 +753,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-18</frist>
       </ausleihe>
     </ausleihen>
@@ -771,7 +771,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-18</frist>
       </ausleihe>
     </ausleihen>
@@ -807,7 +807,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-18</frist>
       </ausleihe>
     </ausleihen>
@@ -843,7 +843,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-20</frist>
       </ausleihe>
     </ausleihen>
@@ -879,7 +879,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-20</frist>
       </ausleihe>
     </ausleihen>
@@ -897,7 +897,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-20</frist>
       </ausleihe>
     </ausleihen>
@@ -933,7 +933,7 @@
       <ausleihe>
         <nutzer>Benny</nutzer>
         <seit>2026-05-22</seit>
-        <zurueck/>
+        <zurueck>2026-06-06</zurueck>
         <frist>2026-06-20</frist>
       </ausleihe>
     </ausleihen>
@@ -953,6 +953,186 @@
         <seit>2026-05-22</seit>
         <zurueck/>
         <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0537064</medium_id>
+    <titel>Der Sternenmann - Lieder und Hörspiel zur guten Nacht</titel>
+    <verfasser>Thun, Max von</verfasser>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/5l92bz3tv0xmw0em22qvd29wrpl9</cover_url>
+    <cover_lokal>covers/0537064.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0573926</medium_id>
+    <titel>Thomas &amp; seine Freunde - Große Welt! Große Abenteuer!</titel>
+    <verfasser/>
+    <mediengruppe>Hörspielzeug</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn/>
+    <cover_url>https://toniesclub.s3.eu-central-1.amazonaws.com/2p2oqfjx0yctk3e01oe9leigbtql</cover_url>
+    <cover_lokal>covers/0573926.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-06-20</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0470029</medium_id>
+    <titel>Was macht der Bauer?</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473326600</isbn>
+    <cover_url>https://covers.openlibrary.org/b/isbn/9783473326600-L.jpg</cover_url>
+    <cover_lokal>covers/0470029.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0471815</medium_id>
+    <titel>1 x kochen für alle</titel>
+    <verfasser>Radtke, Julia</verfasser>
+    <mediengruppe>Sachbuch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783831032334</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783831032334</cover_url>
+    <cover_lokal>covers/0471815.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0488045</medium_id>
+    <titel>4, 5 und ?</titel>
+    <verfasser>Genechten, Guido van</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783905945645</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783905945645</cover_url>
+    <cover_lokal>covers/0488045.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0514275</medium_id>
+    <titel>Das wahrlich sagenhafte Rätsel der Trolle</titel>
+    <verfasser>Schmachtl, Andreas H.</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783401715223</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783401715223</cover_url>
+    <cover_lokal>covers/0514275.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0534992</medium_id>
+    <titel>Bibi &amp; Tina - Fohlen Felix und der verflixte Schnupfen</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783129496626</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783129496626</cover_url>
+    <cover_lokal>covers/0534992.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0544756</medium_id>
+    <titel>Conni und das neue Baby</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783551511607</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783551511607</cover_url>
+    <cover_lokal>covers/0544756.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0582473</medium_id>
+    <titel>Mein Wörter-Bilderbuch - Kindergarten</titel>
+    <verfasser/>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783473492671</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783473492671</cover_url>
+    <cover_lokal>covers/0582473.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
+      </ausleihe>
+    </ausleihen>
+  </medium>
+  <medium>
+    <medium_id>0601845</medium_id>
+    <titel>Ali - Muhammad Ali</titel>
+    <verfasser>Sánchez Vegara, María Isabel</verfasser>
+    <mediengruppe>Kinder-Buch</mediengruppe>
+    <nutzer>Benny</nutzer>
+    <isbn>9783458643371</isbn>
+    <cover_url>https://portal.dnb.de/opac/mvb/cover?isbn=9783458643371</cover_url>
+    <cover_lokal>covers/0601845.jpg</cover_lokal>
+    <ausleihen>
+      <ausleihe>
+        <nutzer>Benny</nutzer>
+        <seit>2026-06-06</seit>
+        <zurueck/>
+        <frist>2026-07-04</frist>
       </ausleihe>
     </ausleihen>
   </medium>
